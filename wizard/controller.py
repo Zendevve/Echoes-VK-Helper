@@ -118,7 +118,7 @@ class WizardState:
     _elevated_attempted: bool = False
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any] | None) -> "WizardState":
+    def from_dict(cls, data: dict[str, Any] | None) -> WizardState:
         """Build a WizardState from a raw dict, coercing string paths to Path.
 
         The on-disk and resume-payload schemas are stringly-typed. Constructing
