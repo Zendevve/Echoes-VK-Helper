@@ -22,6 +22,11 @@ tests/fixtures/.tmp/
 .pytest_cache/
 .tox/
 
+# Vulkan update tool snapshots (local rollback state, not part of source)
+assets/vulkan/.previous/
+assets/vulkan/.previous.*/
+assets/vulkan/.staging/
+
 # Agent / editor
 .kilo/
 .kilocode/
