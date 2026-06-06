@@ -1,0 +1,125 @@
+2026-06-06 08:56:52 [INFO] MainThread: Logging initialized at D:\COMPROG\Echoes VK Helper\logs\install.log
+2026-06-06 08:56:53 [INFO] detect: Found game at D:\Games\Echoes of Angmar
+2026-06-06 08:56:53 [INFO] install: Created backup: C:\Users\natha\AppData\Local\Temp\tmpvb_y6wkf\UserPreferences.echoes.ini.bak
+2026-06-06 08:56:53 [INFO] install: Config updated at C:\Users\natha\AppData\Local\Temp\tmpvb_y6wkf\UserPreferences.echoes.ini (section=General, keys=['Fullscreen', 'ConfineFullScreenMouseCursor', 'Resolution'])
+2026-06-06 08:56:53 [INFO] install: Created backup: C:\Users\natha\AppData\Local\Temp\tmpvb_y6wkf\Echoes\dinput8.ini.backup
+2026-06-06 08:56:53 [INFO] install: Existing dinput8.ini backed up to C:\Users\natha\AppData\Local\Temp\tmpvb_y6wkf\Echoes\dinput8.ini.backup
+2026-06-06 08:56:53 [INFO] install: Installed D:\COMPROG\Echoes VK Helper\assets\vulkan\dinput8.ini -> C:\Users\natha\AppData\Local\Temp\tmpvb_y6wkf\Echoes\dinput8.ini
+2026-06-06 08:56:53 [INFO] install: Created backup: C:\Users\natha\AppData\Local\Temp\tmpvb_y6wkf\Echoes\dinput8.dll.backup
+2026-06-06 08:56:53 [INFO] install: Existing dinput8.dll backed up to C:\Users\natha\AppData\Local\Temp\tmpvb_y6wkf\Echoes\dinput8.dll.backup
+2026-06-06 08:56:53 [INFO] Thread-1 (_run_install): Created backup: C:\Users\natha\AppData\Local\Temp\tmpvb_y6wkf\UserPreferences.echoes.ini.bak
+2026-06-06 08:56:53 [INFO] Thread-1 (_run_install): Config updated at C:\Users\natha\AppData\Local\Temp\tmpvb_y6wkf\UserPreferences.echoes.ini (section=General, keys=['Fullscreen', 'ConfineFullScreenMouseCursor', 'Resolution'])
+2026-06-06 08:56:53 [INFO] Thread-1 (_run_install): Created backup: C:\Users\natha\AppData\Local\Temp\tmpvb_y6wkf\Echoes\dinput8.ini.backup
+2026-06-06 08:56:53 [INFO] Thread-1 (_run_install): Existing dinput8.ini backed up to C:\Users\natha\AppData\Local\Temp\tmpvb_y6wkf\Echoes\dinput8.ini.backup
+2026-06-06 08:56:53 [INFO] Thread-1 (_run_install): Installed D:\COMPROG\Echoes VK Helper\tests\_fake_vulkan_src\dinput8.ini -> C:\Users\natha\AppData\Local\Temp\tmpvb_y6wkf\Echoes\dinput8.ini
+2026-06-06 08:56:53 [INFO] Thread-1 (_run_install): Created backup: C:\Users\natha\AppData\Local\Temp\tmpvb_y6wkf\Echoes\dinput8.dll.backup
+2026-06-06 08:56:53 [INFO] Thread-1 (_run_install): Existing dinput8.dll backed up to C:\Users\natha\AppData\Local\Temp\tmpvb_y6wkf\Echoes\dinput8.dll.backup
+2026-06-06 08:56:53 [INFO] install: Installed D:\COMPROG\Echoes VK Helper\assets\vulkan\dinput8.dll -> C:\Users\natha\AppData\Local\Temp\tmpvb_y6wkf\Echoes\dinput8.dll
+2026-06-06 08:56:53 [INFO] install: Created backup: C:\Users\natha\AppData\Local\Temp\tmpvb_y6wkf\Echoes\d3d9.dll.backup
+2026-06-06 08:56:53 [INFO] install: Existing d3d9.dll backed up to C:\Users\natha\AppData\Local\Temp\tmpvb_y6wkf\Echoes\d3d9.dll.backup
+2026-06-06 08:57:31 [INFO] MainThread: Logging initialized at D:\COMPROG\Echoes VK Helper\logs\install.log
+2026-06-06 08:57:32 [INFO] detect: Found game at D:\Games\Echoes of Angmar
+2026-06-06 08:57:32 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmpj6jyi68y\UserPreferences.echoes.ini.bak
+2026-06-06 08:57:32 [INFO] install-test: Config updated at C:\Users\natha\AppData\Local\Temp\tmpj6jyi68y\UserPreferences.echoes.ini (section=General, keys=['Fullscreen', 'ConfineFullScreenMouseCursor', 'Resolution'])
+2026-06-06 08:57:32 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmpj6jyi68y\Echoes\dinput8.ini.backup
+2026-06-06 08:57:32 [INFO] install-test: Existing dinput8.ini backed up to C:\Users\natha\AppData\Local\Temp\tmpj6jyi68y\Echoes\dinput8.ini.backup
+2026-06-06 08:57:32 [INFO] install-test: Installed D:\COMPROG\Echoes VK Helper\tests\_fake_vulkan_src\dinput8.ini -> C:\Users\natha\AppData\Local\Temp\tmpj6jyi68y\Echoes\dinput8.ini
+2026-06-06 08:57:32 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmpj6jyi68y\Echoes\dinput8.dll.backup
+2026-06-06 08:57:32 [INFO] install-test: Existing dinput8.dll backed up to C:\Users\natha\AppData\Local\Temp\tmpj6jyi68y\Echoes\dinput8.dll.backup
+2026-06-06 08:57:32 [INFO] install-test: Installed D:\COMPROG\Echoes VK Helper\tests\_fake_vulkan_src\dinput8.dll -> C:\Users\natha\AppData\Local\Temp\tmpj6jyi68y\Echoes\dinput8.dll
+2026-06-06 08:57:32 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmpj6jyi68y\Echoes\d3d9.dll.backup
+2026-06-06 08:57:32 [INFO] install-test: Existing d3d9.dll backed up to C:\Users\natha\AppData\Local\Temp\tmpj6jyi68y\Echoes\d3d9.dll.backup
+2026-06-06 08:57:32 [INFO] install-test: Installed D:\COMPROG\Echoes VK Helper\tests\_fake_vulkan_src\d3d9.dll -> C:\Users\natha\AppData\Local\Temp\tmpj6jyi68y\Echoes\d3d9.dll
+2026-06-06 09:15:26 [INFO] MainThread: Logging initialized at D:\COMPROG\Echoes VK Helper\logs\install.log
+2026-06-06 09:15:26 [INFO] detect: Found game at D:\Games\Echoes of Angmar
+2026-06-06 09:15:26 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmp2__75bzo\UserPreferences.echoes.ini.bak
+2026-06-06 09:15:26 [INFO] install-test: Config updated at C:\Users\natha\AppData\Local\Temp\tmp2__75bzo\UserPreferences.echoes.ini (section=General, keys=['Fullscreen', 'ConfineFullScreenMouseCursor', 'Resolution'])
+2026-06-06 09:15:26 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmp2__75bzo\Echoes\dinput8.ini.backup
+2026-06-06 09:15:26 [INFO] install-test: Existing dinput8.ini backed up to C:\Users\natha\AppData\Local\Temp\tmp2__75bzo\Echoes\dinput8.ini.backup
+2026-06-06 09:15:27 [INFO] install-test: Installed D:\COMPROG\Echoes VK Helper\tests\_fake_vulkan_src\dinput8.ini -> C:\Users\natha\AppData\Local\Temp\tmp2__75bzo\Echoes\dinput8.ini
+2026-06-06 09:15:27 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmp2__75bzo\Echoes\dinput8.dll.backup
+2026-06-06 09:15:27 [INFO] install-test: Existing dinput8.dll backed up to C:\Users\natha\AppData\Local\Temp\tmp2__75bzo\Echoes\dinput8.dll.backup
+2026-06-06 09:15:27 [INFO] install-test: Installed D:\COMPROG\Echoes VK Helper\tests\_fake_vulkan_src\dinput8.dll -> C:\Users\natha\AppData\Local\Temp\tmp2__75bzo\Echoes\dinput8.dll
+2026-06-06 09:15:27 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmp2__75bzo\Echoes\d3d9.dll.backup
+2026-06-06 09:15:27 [INFO] install-test: Existing d3d9.dll backed up to C:\Users\natha\AppData\Local\Temp\tmp2__75bzo\Echoes\d3d9.dll.backup
+2026-06-06 09:15:27 [INFO] install-test: Installed D:\COMPROG\Echoes VK Helper\tests\_fake_vulkan_src\d3d9.dll -> C:\Users\natha\AppData\Local\Temp\tmp2__75bzo\Echoes\d3d9.dll
+2026-06-06 09:16:41 [INFO] MainThread: Logging initialized at D:\COMPROG\Echoes VK Helper\logs\install.log
+2026-06-06 09:16:41 [INFO] detect: Found game at D:\Games\Echoes of Angmar
+2026-06-06 09:16:41 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmpfa0_3te9\UserPreferences.echoes.ini.bak
+2026-06-06 09:16:41 [INFO] install-test: Config updated at C:\Users\natha\AppData\Local\Temp\tmpfa0_3te9\UserPreferences.echoes.ini (section=General, keys=['Fullscreen', 'ConfineFullScreenMouseCursor', 'Resolution'])
+2026-06-06 09:16:41 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmpfa0_3te9\Echoes\dinput8.ini.backup
+2026-06-06 09:16:41 [INFO] install-test: Existing dinput8.ini backed up to C:\Users\natha\AppData\Local\Temp\tmpfa0_3te9\Echoes\dinput8.ini.backup
+2026-06-06 09:16:41 [INFO] install-test: Installed D:\COMPROG\Echoes VK Helper\tests\_fake_vulkan_src\dinput8.ini -> C:\Users\natha\AppData\Local\Temp\tmpfa0_3te9\Echoes\dinput8.ini
+2026-06-06 09:16:41 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmpfa0_3te9\Echoes\dinput8.dll.backup
+2026-06-06 09:16:41 [INFO] install-test: Existing dinput8.dll backed up to C:\Users\natha\AppData\Local\Temp\tmpfa0_3te9\Echoes\dinput8.dll.backup
+2026-06-06 09:16:41 [INFO] install-test: Installed D:\COMPROG\Echoes VK Helper\tests\_fake_vulkan_src\dinput8.dll -> C:\Users\natha\AppData\Local\Temp\tmpfa0_3te9\Echoes\dinput8.dll
+2026-06-06 09:16:41 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmpfa0_3te9\Echoes\d3d9.dll.backup
+2026-06-06 09:16:41 [INFO] install-test: Existing d3d9.dll backed up to C:\Users\natha\AppData\Local\Temp\tmpfa0_3te9\Echoes\d3d9.dll.backup
+2026-06-06 09:16:41 [INFO] install-test: Installed D:\COMPROG\Echoes VK Helper\tests\_fake_vulkan_src\d3d9.dll -> C:\Users\natha\AppData\Local\Temp\tmpfa0_3te9\Echoes\d3d9.dll
+2026-06-06 09:37:48 [INFO] MainThread: Logging initialized at D:\COMPROG\Echoes VK Helper\logs\install.log
+2026-06-06 09:37:48 [INFO] detect: Found game at D:\Games\Echoes of Angmar
+2026-06-06 09:37:48 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmpv7t_llmc\UserPreferences.echoes.ini.bak
+2026-06-06 09:37:48 [INFO] install-test: Config updated at C:\Users\natha\AppData\Local\Temp\tmpv7t_llmc\UserPreferences.echoes.ini (section=General, keys=['Fullscreen', 'ConfineFullScreenMouseCursor', 'Resolution'])
+2026-06-06 09:37:48 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmpv7t_llmc\Echoes\dinput8.ini.backup
+2026-06-06 09:37:48 [INFO] install-test: Existing dinput8.ini backed up to C:\Users\natha\AppData\Local\Temp\tmpv7t_llmc\Echoes\dinput8.ini.backup
+2026-06-06 09:37:48 [INFO] install-test: Installed D:\COMPROG\Echoes VK Helper\tests\_fake_vulkan_src\dinput8.ini -> C:\Users\natha\AppData\Local\Temp\tmpv7t_llmc\Echoes\dinput8.ini
+2026-06-06 09:37:48 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmpv7t_llmc\Echoes\dinput8.dll.backup
+2026-06-06 09:37:48 [INFO] install-test: Existing dinput8.dll backed up to C:\Users\natha\AppData\Local\Temp\tmpv7t_llmc\Echoes\dinput8.dll.backup
+2026-06-06 09:37:48 [INFO] install-test: Installed D:\COMPROG\Echoes VK Helper\tests\_fake_vulkan_src\dinput8.dll -> C:\Users\natha\AppData\Local\Temp\tmpv7t_llmc\Echoes\dinput8.dll
+2026-06-06 09:37:48 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmpv7t_llmc\Echoes\d3d9.dll.backup
+2026-06-06 09:37:48 [INFO] install-test: Existing d3d9.dll backed up to C:\Users\natha\AppData\Local\Temp\tmpv7t_llmc\Echoes\d3d9.dll.backup
+2026-06-06 09:37:48 [INFO] install-test: Installed D:\COMPROG\Echoes VK Helper\tests\_fake_vulkan_src\d3d9.dll -> C:\Users\natha\AppData\Local\Temp\tmpv7t_llmc\Echoes\d3d9.dll
+2026-06-06 09:59:13 [INFO] MainThread: Logging initialized at D:\COMPROG\Echoes VK Helper\logs\install.log
+2026-06-06 09:59:13 [INFO] detect: Found game at D:\Games\Echoes of Angmar
+2026-06-06 09:59:13 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmpf1soydzi\UserPreferences.echoes.ini.bak
+2026-06-06 09:59:13 [INFO] install-test: Config updated at C:\Users\natha\AppData\Local\Temp\tmpf1soydzi\UserPreferences.echoes.ini (section=General, keys=['Fullscreen', 'ConfineFullScreenMouseCursor', 'Resolution'])
+2026-06-06 09:59:13 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmpf1soydzi\Echoes\dinput8.ini.backup
+2026-06-06 09:59:13 [INFO] install-test: Existing dinput8.ini backed up to C:\Users\natha\AppData\Local\Temp\tmpf1soydzi\Echoes\dinput8.ini.backup
+2026-06-06 09:59:13 [INFO] install-test: Installed D:\COMPROG\Echoes VK Helper\tests\_fake_vulkan_src\dinput8.ini -> C:\Users\natha\AppData\Local\Temp\tmpf1soydzi\Echoes\dinput8.ini
+2026-06-06 09:59:13 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmpf1soydzi\Echoes\dinput8.dll.backup
+2026-06-06 09:59:13 [INFO] install-test: Existing dinput8.dll backed up to C:\Users\natha\AppData\Local\Temp\tmpf1soydzi\Echoes\dinput8.dll.backup
+2026-06-06 09:59:13 [INFO] install-test: Installed D:\COMPROG\Echoes VK Helper\tests\_fake_vulkan_src\dinput8.dll -> C:\Users\natha\AppData\Local\Temp\tmpf1soydzi\Echoes\dinput8.dll
+2026-06-06 09:59:13 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmpf1soydzi\Echoes\d3d9.dll.backup
+2026-06-06 09:59:13 [INFO] install-test: Existing d3d9.dll backed up to C:\Users\natha\AppData\Local\Temp\tmpf1soydzi\Echoes\d3d9.dll.backup
+2026-06-06 09:59:13 [INFO] install-test: Installed D:\COMPROG\Echoes VK Helper\tests\_fake_vulkan_src\d3d9.dll -> C:\Users\natha\AppData\Local\Temp\tmpf1soydzi\Echoes\d3d9.dll
+2026-06-06 10:51:13 [INFO] MainThread: Logging initialized at D:\COMPROG\Echoes VK Helper\logs\install.log
+2026-06-06 10:51:14 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmpep7p7xk6\UserPreferences.echoes.ini.bak
+2026-06-06 10:51:14 [INFO] install-test: Config updated at C:\Users\natha\AppData\Local\Temp\tmpep7p7xk6\UserPreferences.echoes.ini (section=General, keys=['Fullscreen', 'ConfineFullScreenMouseCursor', 'Resolution'])
+2026-06-06 10:51:14 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmpep7p7xk6\Echoes\dinput8.ini.backup
+2026-06-06 10:51:14 [INFO] install-test: Existing dinput8.ini backed up to C:\Users\natha\AppData\Local\Temp\tmpep7p7xk6\Echoes\dinput8.ini.backup
+2026-06-06 10:51:14 [INFO] install-test: Installed D:\COMPROG\Echoes VK Helper\tests\_fake_vulkan_src\dinput8.ini -> C:\Users\natha\AppData\Local\Temp\tmpep7p7xk6\Echoes\dinput8.ini
+2026-06-06 10:51:14 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmpep7p7xk6\Echoes\dinput8.dll.backup
+2026-06-06 10:51:14 [INFO] install-test: Existing dinput8.dll backed up to C:\Users\natha\AppData\Local\Temp\tmpep7p7xk6\Echoes\dinput8.dll.backup
+2026-06-06 10:51:14 [INFO] install-test: Installed D:\COMPROG\Echoes VK Helper\tests\_fake_vulkan_src\dinput8.dll -> C:\Users\natha\AppData\Local\Temp\tmpep7p7xk6\Echoes\dinput8.dll
+2026-06-06 10:51:14 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmpep7p7xk6\Echoes\d3d9.dll.backup
+2026-06-06 10:51:14 [INFO] install-test: Existing d3d9.dll backed up to C:\Users\natha\AppData\Local\Temp\tmpep7p7xk6\Echoes\d3d9.dll.backup
+2026-06-06 10:51:14 [INFO] install-test: Installed D:\COMPROG\Echoes VK Helper\tests\_fake_vulkan_src\d3d9.dll -> C:\Users\natha\AppData\Local\Temp\tmpep7p7xk6\Echoes\d3d9.dll
+2026-06-06 11:12:17 [INFO] MainThread: Logging initialized at D:\COMPROG\Echoes VK Helper\logs\install.log
+2026-06-06 11:15:01 [INFO] MainThread: Logging initialized at D:\COMPROG\Echoes VK Helper\logs\install.log
+2026-06-06 11:15:01 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmp2826yb3t\UserPreferences.echoes.ini.bak
+2026-06-06 11:15:01 [INFO] install-test: Config updated at C:\Users\natha\AppData\Local\Temp\tmp2826yb3t\UserPreferences.echoes.ini (section=General, keys=['Fullscreen', 'ConfineFullScreenMouseCursor', 'Resolution'])
+2026-06-06 11:15:01 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmp2826yb3t\Echoes\dinput8.ini.backup
+2026-06-06 11:15:01 [INFO] install-test: Existing dinput8.ini backed up to C:\Users\natha\AppData\Local\Temp\tmp2826yb3t\Echoes\dinput8.ini.backup
+2026-06-06 11:15:01 [INFO] install-test: Installed D:\COMPROG\Echoes VK Helper\tests\_fake_vulkan_src\dinput8.ini -> C:\Users\natha\AppData\Local\Temp\tmp2826yb3t\Echoes\dinput8.ini
+2026-06-06 11:15:01 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmp2826yb3t\Echoes\dinput8.dll.backup
+2026-06-06 11:15:01 [INFO] install-test: Existing dinput8.dll backed up to C:\Users\natha\AppData\Local\Temp\tmp2826yb3t\Echoes\dinput8.dll.backup
+2026-06-06 11:15:01 [INFO] install-test: Installed D:\COMPROG\Echoes VK Helper\tests\_fake_vulkan_src\dinput8.dll -> C:\Users\natha\AppData\Local\Temp\tmp2826yb3t\Echoes\dinput8.dll
+2026-06-06 11:15:01 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmp2826yb3t\Echoes\d3d9.dll.backup
+2026-06-06 11:15:01 [INFO] install-test: Existing d3d9.dll backed up to C:\Users\natha\AppData\Local\Temp\tmp2826yb3t\Echoes\d3d9.dll.backup
+2026-06-06 11:15:01 [INFO] install-test: Installed D:\COMPROG\Echoes VK Helper\tests\_fake_vulkan_src\d3d9.dll -> C:\Users\natha\AppData\Local\Temp\tmp2826yb3t\Echoes\d3d9.dll
+2026-06-06 11:19:07 [INFO] MainThread: Logging initialized at D:\COMPROG\Echoes VK Helper\logs\install.log
+2026-06-06 11:19:07 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmp1ri6qwhx\UserPreferences.echoes.ini.bak
+2026-06-06 11:19:07 [INFO] install-test: Config updated at C:\Users\natha\AppData\Local\Temp\tmp1ri6qwhx\UserPreferences.echoes.ini (section=General, keys=['Fullscreen', 'ConfineFullScreenMouseCursor', 'Resolution'])
+2026-06-06 11:19:07 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmp1ri6qwhx\Echoes\dinput8.ini.backup
+2026-06-06 11:19:07 [INFO] install-test: Existing dinput8.ini backed up to C:\Users\natha\AppData\Local\Temp\tmp1ri6qwhx\Echoes\dinput8.ini.backup
+2026-06-06 11:19:07 [INFO] install-test: Installed D:\COMPROG\Echoes VK Helper\tests\_fake_vulkan_src\dinput8.ini -> C:\Users\natha\AppData\Local\Temp\tmp1ri6qwhx\Echoes\dinput8.ini
+2026-06-06 11:19:07 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmp1ri6qwhx\Echoes\dinput8.dll.backup
+2026-06-06 11:19:07 [INFO] install-test: Existing dinput8.dll backed up to C:\Users\natha\AppData\Local\Temp\tmp1ri6qwhx\Echoes\dinput8.dll.backup
+2026-06-06 11:19:07 [INFO] install-test: Installed D:\COMPROG\Echoes VK Helper\tests\_fake_vulkan_src\dinput8.dll -> C:\Users\natha\AppData\Local\Temp\tmp1ri6qwhx\Echoes\dinput8.dll
+2026-06-06 11:19:07 [INFO] install-test: Created backup: C:\Users\natha\AppData\Local\Temp\tmp1ri6qwhx\Echoes\d3d9.dll.backup
+2026-06-06 11:19:07 [INFO] install-test: Existing d3d9.dll backed up to C:\Users\natha\AppData\Local\Temp\tmp1ri6qwhx\Echoes\d3d9.dll.backup
+2026-06-06 11:19:07 [INFO] install-test: Installed D:\COMPROG\Echoes VK Helper\tests\_fake_vulkan_src\d3d9.dll -> C:\Users\natha\AppData\Local\Temp\tmp1ri6qwhx\Echoes\d3d9.dll
+2026-06-06 11:22:19 [INFO] MainThread: Logging initialized at D:\COMPROG\Echoes VK Helper\logs\install.log
+2026-06-06 11:22:19 [INFO] MainThread: === Echoes Vulkan Helper started ===
+2026-06-06 11:22:47 [INFO] detect: Found game at D:\Games\Echoes of Angmar
+2026-06-06 11:23:23 [INFO] detect: Found game at D:\Games\Echoes of Angmar
