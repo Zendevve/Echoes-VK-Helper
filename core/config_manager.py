@@ -63,10 +63,14 @@ def read_setting(path: Path, key: str) -> str | None:
     return None
 
 
-def apply_recommended_settings(path: Path, resolution: tuple[int, int]) -> None:
+def apply_recommended_settings(
+    path: Path, resolution: tuple[int, int]
+) -> tuple[str, list[str]]:
     """Ensure Fullscreen=True, ConfineFullScreenMouseCursor=False, Resolution=WxH.
 
-    Preserves all other settings. Writes atomically via a temp file.
+    Preserves all other settings. Writes atomically via a temp file. Returns
+    the section name and the list of keys written, for callers that want to
+    report what changed.
     """
     width, height = resolution
     desired = dict(REQUIRED_KEYS)
@@ -85,9 +89,11 @@ def apply_recommended_settings(path: Path, resolution: tuple[int, int]) -> None:
     with tmp_path.open("w", encoding="utf-8") as fh:
         parser.write(fh)
     os.replace(tmp_path, path)
+    keys = list(desired.keys())
     logger.info(
         "Config updated at %s (section=%s, keys=%s)",
         path,
         target_section,
-        list(desired.keys()),
+        keys,
     )
+    return target_section, keys

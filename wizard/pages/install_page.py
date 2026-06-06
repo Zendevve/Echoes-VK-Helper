@@ -14,7 +14,7 @@ import queue
 import threading
 import time
 import traceback
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 
 import customtkinter as ctk
 
@@ -259,15 +259,20 @@ class InstallPage(ctk.CTkFrame):
                 return
 
             self._check_abort()
-            self._run_step_backup(state)
+            self._paced("creating backup", "[...]  creating backup", 5,
+                        self._run_step_backup, state)
             self._check_abort()
-            self._run_step_resolution(state)
+            self._paced("detecting resolution", "[...]  detecting resolution", 25,
+                        self._run_step_resolution, state)
             self._check_abort()
-            self._run_step_config(state)
+            self._paced("updating configuration", "[...]  updating configuration", 40,
+                        self._run_step_config, state)
             self._check_abort()
-            self._run_step_vulkan(state)
+            self._paced("installing vulkan files", "[...]  installing vulkan files", 60,
+                        self._run_step_vulkan, state)
             self._check_abort()
-            self._run_step_validation(state)
+            self._paced("running validation", "[...]  running validation", 90,
+                        self._run_step_validation, state)
             self._step("[x]  done.", 100)
             self._q.put(("done",))
         except InstallAborted as exc:
@@ -280,37 +285,66 @@ class InstallPage(ctk.CTkFrame):
             self._q.put(("log", tb))
             self._q.put(("error", exc))
 
+    def _paced(
+        self,
+        name: str,
+        label: str,
+        pct: float,
+        step_fn: Callable[[WizardState], None],
+        state: WizardState,
+    ) -> None:
+        """Run one install step with visible pacing.
+
+        The step's own sub-bullets (e.g. ``    - rotating foo.ini``) are pushed
+        by the step function via ``_q.put(("log", ...))``. This wrapper logs
+        the start and end of the step, drives the progress bar, and sleeps
+        briefly so the UI can render the transition between steps.
+        """
+        self._step(label, pct)
+        self._q.put(("log", f"[...]  step: {name}"))
+        start = time.perf_counter()
+        try:
+            step_fn(state)
+        finally:
+            elapsed = time.perf_counter() - start
+            self._q.put(("log", f"[+]  step: {name} ({elapsed:.2f}s)"))
+            time.sleep(0.3)
+
     def _run_step_backup(self, state: WizardState) -> None:
-        self._step("[...]  creating backup", 5)
         if not state.config_path:
+            self._q.put(("log", "    - no config path, skipping"))
             return
         from core.backup_manager import create_backup
 
         backup = create_backup(state.config_path)
-        self._q.put(("log", f"[+] backup created: {backup}"))
+        self._q.put(("log", f"    - rotated {state.config_path.name} -> {backup.name}"))
         state.backup_paths.append(str(backup))
 
     def _run_step_resolution(self, state: WizardState) -> None:
-        self._step("[...]  detecting resolution", 25)
         if state.resolution is not None:
+            self._q.put(("log",
+                         f"    - using cached resolution: {state.resolution[0]}x{state.resolution[1]}"))
             return
         from core.resolution import get_native_resolution
 
         state.resolution = get_native_resolution()
-        self._q.put(("log", f"[+] resolution: {state.resolution[0]}x{state.resolution[1]}"))
+        self._q.put(("log",
+                     f"    - native: {state.resolution[0]}x{state.resolution[1]}"))
 
     def _run_step_config(self, state: WizardState) -> None:
-        self._step("[...]  updating configuration", 40)
         if not state.config_path:
+            self._q.put(("log", "    - no config path, skipping"))
             return
         from core.config_manager import apply_recommended_settings
 
-        apply_recommended_settings(state.config_path, state.resolution)
-        self._q.put(("log", "[+] configuration updated."))
+        section, keys = apply_recommended_settings(state.config_path, state.resolution)
+        self._q.put(("log", f"    - section: {section}"))
+        for key in keys:
+            self._q.put(("log", f"    - key:    {key}"))
 
     def _run_step_vulkan(self, state: WizardState) -> None:
-        self._step("[...]  installing vulkan files", 60)
         if not state.game_path:
+            self._q.put(("log", "    - no game path, skipping"))
             return
         from core.vulkan_installer import (
             VulkanInstallError,
@@ -328,11 +362,13 @@ class InstallPage(ctk.CTkFrame):
             self._q.put(("log", f"[x] vulkan install failed: {exc}"))
             raise
 
+        for name in result.rotated_backups:
+            self._q.put(("log", f"    - rotated {name.name}"))
+        for dst in result.installed:
+            self._q.put(("log", f"    - installed {dst.name}"))
         state.vulkan_install_result = result.__dict__
-        self._q.put(("log", "[+] vulkan files installed."))
 
     def _run_step_validation(self, state: WizardState) -> None:
-        self._step("[...]  running validation", 90)
         from core.validator import run_validation
 
         backup_path = None
@@ -345,6 +381,20 @@ class InstallPage(ctk.CTkFrame):
         result = run_validation(state.config_path, backup_path, state.game_path)
         state.validation = result.__dict__
         state.install_succeeded = result.all_passed
+
+        for name, passed in (
+            ("config found", result.config_found),
+            ("config backup", result.backup_found),
+            ("game installation", result.game_found),
+            ("settings applied", result.settings_applied),
+            ("vulkan files installed", result.vulkan_installed),
+            ("fullscreen=true", result.fullscreen_set),
+            ("cursor unconfined", result.cursor_unconfined),
+            ("resolution set", result.resolution_set),
+            ("dll files present", result.dll_files_present),
+        ):
+            mark = "[+]" if passed else "[x]"
+            self._q.put(("log", f"    - {mark} {name}"))
 
         for msg in result.failed():
             self._q.put(("log", f"[x] failed: {msg}"))
