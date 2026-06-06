@@ -37,7 +37,9 @@ class GpuCheckResult:
             "name": self.name,
             "reason": self.reason,
             "api_version": self.api_version,
-            "vulkan_version": list(self.vulkan_version) if self.vulkan_version is not None else None,
+            "vulkan_version": list(self.vulkan_version)
+            if self.vulkan_version is not None
+            else None,
         }
 
 
@@ -72,7 +74,7 @@ def _decode_version_tuple(raw: int) -> tuple[int, int, int] | None:
         (raw >> 22) & 0x7F,
         (raw >> 12) & 0x3FF,
         raw & 0xFFF,
-)
+    )
 
 
 def _probe_vulkan() -> tuple[bool, int, str]:
@@ -149,17 +151,11 @@ def check_vulkan_support(
 
         if ok and detected is not None:
             name = _query_display_device() or "Vulkan-capable GPU"
-            meets_min = (
-                detected[0] > min_version[0]
-                or (
-                    detected[0] == min_version[0]
-                    and (
-                        detected[1] > min_version[1]
-                        or (
-                            detected[1] == min_version[1]
-                            and detected[2] >= min_version[2]
-                        )
-                    )
+            meets_min = detected[0] > min_version[0] or (
+                detected[0] == min_version[0]
+                and (
+                    detected[1] > min_version[1]
+                    or (detected[1] == min_version[1] and detected[2] >= min_version[2])
                 )
             )
             if meets_min:

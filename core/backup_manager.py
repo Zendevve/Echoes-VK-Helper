@@ -45,16 +45,12 @@ def create_backup(path: Path, suffix: str = ".bak", cap: int = DEFAULT_CAP) -> P
     # succession on the same source.
     counter = 0
     while True:
-        tmp = new_backup.with_name(
-            f"{new_backup.name}.tmp.{os.getpid()}.{counter}"
-        )
+        tmp = new_backup.with_name(f"{new_backup.name}.tmp.{os.getpid()}.{counter}")
         if not tmp.exists():
             break
         counter += 1
         if counter > 1000:
-            raise OSError(
-                f"Could not find a unique temp name near {new_backup}"
-            )
+            raise OSError(f"Could not find a unique temp name near {new_backup}")
 
     try:
         shutil.copy2(path, tmp)

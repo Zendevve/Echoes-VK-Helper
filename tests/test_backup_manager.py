@@ -39,9 +39,7 @@ def test_six_iteration_chain() -> None:
             create_backup(src)
 
         backups = list_backups(src)
-        assert len(backups) == cap, (
-            f"expected {cap} backups, got {len(backups)}: {backups}"
-        )
+        assert len(backups) == cap, f"expected {cap} backups, got {len(backups)}: {backups}"
 
         slot0 = _chain_slot(src, ".bak", 0)
         assert slot0.read_text(encoding="utf-8") == f"v{cap + 1}"

@@ -65,14 +65,8 @@ def _validate_resume_path(state_path: Path) -> None:
         raise ValueError(f"Resume state path too long: {len(state_str)} bytes")
     for bad in ('"', "'", "\r", "\n", "\t", "\0"):
         if bad in state_str:
-            raise ValueError(
-                f"Resume state path contains unsafe character {bad!r}: {state_str!r}"
-            )
-    temp_root = (
-        Path(os.environ.get("TEMP"))
-        or Path(os.environ.get("TMP"))
-        or Path.home()
-    )
+            raise ValueError(f"Resume state path contains unsafe character {bad!r}: {state_str!r}")
+    temp_root = Path(os.environ.get("TEMP")) or Path(os.environ.get("TMP")) or Path.home()
     try:
         state_path.resolve().relative_to(temp_root.resolve())
     except (ValueError, OSError) as exc:
