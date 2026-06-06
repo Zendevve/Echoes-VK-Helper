@@ -12,7 +12,7 @@ if you need a redistribution agreement.
 
 - **OS:** Windows 10 or Windows 11 (x64)
 - **Disk space:** ~200 MB free (most of it is the bundled DXVK/Vulkan runtime
-  shipped inside the installer)
+  packed inside the EXE at build time)
 - **Administrator rights:** the helper will request elevation if your game
   install lives under `Program Files`; if UAC is disabled group policy-wide,
   move the game out of `Program Files` or run the helper as administrator
@@ -24,14 +24,16 @@ if you need a redistribution agreement.
 
 ## Install
 
-1. Download `EchoesVulkanHelper-setup.exe` from the purchase email or the
+1. Download `EchoesVulkanHelper.exe` from the purchase email or the
    official store link sent after payment.
 2. SmartScreen will show a warning because the binary is unsigned — this
    is normal. Click *More info* → *Run anyway* after confirming the file
    size and build hash against your purchase email.
-3. Double-click the installer, accept the UAC prompt, and follow the wizard.
-4. Launch **Echoes Vulkan Helper** from the Start menu (or the desktop
-   shortcut, if you opted to create one).
+3. Double-click the EXE. If Windows asks for UAC, accept it — the wizard
+   needs admin to write to the game folder if it lives under
+   `Program Files`. The wizard window opens immediately after.
+4. The EXE does not install anything to your system. When you are done,
+   just delete the file. There is no uninstaller.
 
 ## First run
 
@@ -56,9 +58,9 @@ before running it.
 ## Common issues
 
 - **"SmartScreen prevented an unrecognized app from starting"** when running
-  the installer. This is expected for an unsigned binary. Click *More info*
-  → *Run anyway*, but **only after** confirming the file size and build
-  hash match the values in your purchase email.
+  the EXE. This is expected for an unsigned binary. Click *More info* →
+  *Run anyway*, but **only after** confirming the file size and build hash
+  match the values in your purchase email.
 
 - **Game folder is in `Program Files` and the install step fails with
   permission errors.** The wizard will detect the read-only folder and pop
@@ -69,8 +71,8 @@ before running it.
   If it does not, launch the game once and let it create the file, then
   re-run the helper.
 
-- **Installer crashes immediately on launch.** Capture the Windows Event
-  Viewer entry under *Windows Logs → Application* and email it to support.
+- **EXE crashes immediately on launch.** Capture the Windows Event Viewer
+  entry under *Windows Logs → Application* and email it to support.
 
 - **Roll back a bad install.** The completion page has a *Restore from
   backup* button. The helper keeps a rotating chain of `.bak` /

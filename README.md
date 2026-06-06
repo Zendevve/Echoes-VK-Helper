@@ -9,8 +9,9 @@ LOTRO: Echoes of Angmar, reducing a multi-step manual process to a few clicks.
 Get the prebuilt Windows binary from the official release channel:
 
 - **Purchase & download:** [Echoes Tools store](https://example.com/store) (link to be filled in)
-- **What's in the box:** `EchoesVulkanHelper-setup.exe` (installer) and/or a
-  portable `EchoesVulkanHelper.exe` that requires no installation.
+- **What's in the box:** `EchoesVulkanHelper.exe` — a portable single-file
+  binary built with PyInstaller. No installer, no uninstaller; just
+  download, run, and delete the file when you're done.
 
 > The official binary is **not code-signed** — Windows SmartScreen will warn
 > on first run. This is expected. Click *More info* → *Run anyway* after
@@ -36,11 +37,14 @@ Get the prebuilt Windows binary from the official release channel:
 
 ## Quick start (end users)
 
-1. Download `EchoesVulkanHelper-setup.exe` from the store link above.
-2. Double-click the installer and follow the prompts.
-3. Launch **Echoes Vulkan Helper** from the Start menu.
-4. Follow the on-screen prompts from **Welcome** through **Complete**.
-5. Launch your game. Done.
+1. Download `EchoesVulkanHelper.exe` from the store link above.
+2. Double-click the EXE. SmartScreen will warn (unsigned); click *More info*
+   → *Run anyway* after verifying the build hash.
+3. Follow the on-screen prompts from **Welcome** through **Complete**.
+4. Launch your game. Done.
+
+When you're done with the helper, just delete the EXE. It does not install
+itself anywhere and leaves no system residue.
 
 > On first run, Windows SmartScreen will show a warning because the binary
 > is unsigned. Click *More info* → *Run anyway*. Verify the build hash shown

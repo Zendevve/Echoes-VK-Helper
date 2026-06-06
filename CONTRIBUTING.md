@@ -25,8 +25,8 @@ When opening an issue, please include:
   checkout.
 - For game-detection problems: the path to your `Echoes of Angmar` install
   folder and whether `UserPreferences.echoes.ini` exists there.
-- For installer/build problems: the full `pyinstaller` command output and
-  the contents of `build/` if present.
+- For EXE build problems: the full `pyinstaller` command output and the
+  contents of `build/` if present.
 
 ## Pull request guidelines
 
