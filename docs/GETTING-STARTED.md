@@ -26,8 +26,9 @@ if you need a redistribution agreement.
 
 1. Download `EchoesVulkanHelper-setup.exe` from the purchase email or the
    official store link sent after payment.
-2. Verify the publisher certificate: the SmartScreen dialog must show the
-   project owner's name, not "Unknown publisher".
+2. SmartScreen will show a warning because the binary is unsigned — this
+   is normal. Click *More info* → *Run anyway* after confirming the file
+   size and build hash against your purchase email.
 3. Double-click the installer, accept the UAC prompt, and follow the wizard.
 4. Launch **Echoes Vulkan Helper** from the Start menu (or the desktop
    shortcut, if you opted to create one).
@@ -55,9 +56,9 @@ before running it.
 ## Common issues
 
 - **"SmartScreen prevented an unrecognized app from starting"** when running
-  the installer. This is expected for a small publisher. Click *More info* →
-  *Run anyway*, but **only after** confirming the publisher name matches the
-  one in your purchase email.
+  the installer. This is expected for an unsigned binary. Click *More info*
+  → *Run anyway*, but **only after** confirming the file size and build
+  hash match the values in your purchase email.
 
 - **Game folder is in `Program Files` and the install step fails with
   permission errors.** The wizard will detect the read-only folder and pop
@@ -82,6 +83,8 @@ before running it.
 - [docs/CONFIGURATION.md](./CONFIGURATION.md) — where runtime state is persisted,
   how backups are rotated, and any environment variables the app reads.
 - [COMMERCIAL.md](../COMMERCIAL.md) — your purchased license terms.
-- [LICENSE](../LICENSE) — the AGPL-3.0 terms that cover the source code (you
-  are using the binary, so AGPL does not bind your use of it — see
-  [COMMERCIAL.md](../COMMERCIAL.md) for the license that does).
+- [LICENSE](../LICENSE) — the PolyForm Noncommercial 1.0.0 terms that cover
+  the source code (you are using the binary you purchased, so the
+  noncommercial restrictions don't bind your use of the EXE — see
+  [COMMERCIAL.md](../COMMERCIAL.md) for the licence that lets you build
+  and redistribute the binary yourself).

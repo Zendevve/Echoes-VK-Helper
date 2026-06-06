@@ -49,28 +49,28 @@ Get the prebuilt Windows binary from the official release channel:
 
 ## Build from source
 
-The source is public under a source-available license (see
-[LICENSE](./LICENSE)). Building from source is supported and encouraged for
-auditing, modification, and personal use:
+The source is public under the **PolyForm Noncommercial License 1.0.0**
+(`PolyForm-Noncommercial-1.0.0`, see [LICENSE](./LICENSE)). Building from
+source is supported and encouraged for **personal, educational, research, or
+contribution** purposes. Distributing the binary you build (free or paid,
+inside or outside your organisation) is commercial use and requires a
+separate licence from [COMMERCIAL.md](./COMMERCIAL.md).
 
 ```bash
 pip install -r requirements.lock.txt
 python app.py
 ```
 
-To produce your own single-file EXE:
+To produce your own single-file EXE (for your own non-commercial use):
 
 ```bash
 pip install pyinstaller
 pyinstaller --noconfirm app.spec
 ```
 
-Output: `dist\EchoesVulkanHelper.exe`. See [docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md)
-for the full build/test/CI workflow.
-
-> Distributing a build you produced yourself is permitted only under the
-> terms of [LICENSE](./LICENSE) and, if you want to keep modifications
-> closed, a separate [COMMERCIAL.md](./COMMERCIAL.md) agreement.
+Output: `dist\EchoesVulkanHelper.exe`. See
+[docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md) for the full build/test/CI
+workflow.
 
 ## Support
 
@@ -79,13 +79,14 @@ for the full build/test/CI workflow.
   shown on the wizard's *About* page and the contents of the latest
   `logs\install.log`.
 - **License questions:** see [COMMERCIAL.md](./COMMERCIAL.md).
-- **Security disclosures:** [zendevve@duck.com](mailto:zendevve@duck.com) (PGP
-  key on request).
+- **Security disclosures:** [zendevve@duck.com](mailto:zendevve@duck.com)
+  (PGP key on request).
 
 ## License
 
-The source code in this repository is released under a source-available
-license — see [LICENSE](./LICENSE) for the full text. The prebuilt binary
-is also distributed under that license; commercial users who want to keep
-modifications closed can buy a separate perpetual licence via
-[COMMERCIAL.md](./COMMERCIAL.md).
+The source in this repository is licensed under the **PolyForm
+Noncommercial License 1.0.0** (`PolyForm-Noncommercial-1.0.0`) — see
+[LICENSE](./LICENSE) for the full text. Pull requests and other
+non-commercial use of the source are explicitly allowed. Commercial use
+(including building and redistributing the prebuilt binary) requires a
+separate commercial licence — see [COMMERCIAL.md](./COMMERCIAL.md).

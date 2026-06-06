@@ -19,6 +19,14 @@ classifiers = [
     "Topic :: System :: Installation/Setup",
     "Private :: Do Not Upload",
 ]
+
+# License: PolyForm Noncommercial 1.0.0 (SPDX: PolyForm-Noncommercial-1.0.0).
+# Source is public for noncommercial use (including PRs). Building and
+# redistributing the binary for commercial purposes requires a separate
+# licence — see COMMERCIAL.md. Do not publish to PyPI: PolyForm
+# Noncommercial is not an OSI-approved license and PyPI's automated checks
+# will reject it. The "Private :: Do Not Upload" classifier above enforces
+# this from the build side.
 dependencies = [
     "customtkinter>=5.2.0",
     "screeninfo>=0.8.1",

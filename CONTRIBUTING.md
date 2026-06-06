@@ -2,8 +2,16 @@
 # Contributing
 
 Thanks for your interest in improving the Echoes Vulkan Helper. The source
-is publicly readable under a source-available license (see
-[LICENSE](./LICENSE)) and **pull requests are welcome**.
+is publicly readable under the **PolyForm Noncommercial License 1.0.0**
+(`PolyForm-Noncommercial-1.0.0`, see [LICENSE](./LICENSE)) and **pull
+requests are welcome**.
+
+You can use, copy, modify, and build the source for any noncommercial
+purpose — that includes personal use, research, classroom work, and
+contributing back via pull request. Redistributing a binary you built
+yourself to other people is commercial use, which is not allowed under
+PolyForm Noncommercial; see [COMMERCIAL.md](./COMMERCIAL.md) if you need
+that.
 
 ## Bug reports
 
@@ -49,9 +57,12 @@ For the full local setup, test commands, and CI matrix, see
 ## Contributor license
 
 By submitting a pull request, you agree that your contribution is licensed
-under the project's source-available license (see [LICENSE](./LICENSE)).
-If you are contributing on behalf of an employer, make sure you have
-authority to do so. Bundled third-party components keep their own licenses:
+under the project's PolyForm Noncommercial 1.0.0 license (see
+[LICENSE](./LICENSE)). Submitting a PR is noncommercial use of the
+software under the license's terms, so no separate contributor agreement
+is required for the act of contributing. If you are contributing on
+behalf of an employer, make sure you have authority to do so. Bundled
+third-party components keep their own licenses:
 
 - DXVK (`assets/vulkan/d3d9.dll`, `dinput8.dll`) — MIT, upstream at
   <https://github.com/doitsujin/dxvk>.
@@ -59,7 +70,8 @@ authority to do so. Bundled third-party components keep their own licenses:
 
 ## License of the source
 
-The source in this repository is released under a source-available license.
-See [LICENSE](./LICENSE) for the full text and
-[COMMERCIAL.md](./COMMERCIAL.md) if you want a separate commercial licence
-that lets you keep modifications closed.
+The source in this repository is released under the **PolyForm
+Noncommercial License 1.0.0** (`PolyForm-Noncommercial-1.0.0`). See
+[LICENSE](./LICENSE) for the full text. If you want a separate commercial
+licence that lets you keep modifications closed or redistribute a
+build, see [COMMERCIAL.md](./COMMERCIAL.md).
