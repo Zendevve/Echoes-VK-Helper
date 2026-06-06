@@ -11,16 +11,29 @@ from typing import TYPE_CHECKING
 import customtkinter as ctk
 
 from wizard.controller import (
-    BG_DARK,
+    BODY,
+    CANVAS,
     DANGER,
+    HAIRLINE,
+    INK,
+    MUTE,
     SUCCESS,
-    SURFACE,
-    SURFACE_HOVER,
-    TEXT,
-    TEXT_MUTED,
     WizardState,
+    font,
+    heading_font,
 )
-from wizard.pages._common import make_card, make_subtitle, make_title
+from wizard.pages._common import (
+    MARK_FAIL,
+    MARK_OK,
+    MARK_PENDING,
+    make_ascii_bullet,
+    make_card,
+    make_hairline,
+    make_install_snippet,
+    make_secondary_button,
+    make_section_label,
+    make_subtitle,
+)
 
 if TYPE_CHECKING:
     from wizard.controller import WizardController
@@ -30,7 +43,7 @@ logger = logging.getLogger(__name__)
 
 class DetectionPage(ctk.CTkFrame):
     def __init__(self, parent: ctk.CTkFrame, controller: "WizardController") -> None:
-        super().__init__(parent, fg_color=BG_DARK, corner_radius=0)
+        super().__init__(parent, fg_color=CANVAS, corner_radius=0)
         self.controller = controller
         self._q: queue.Queue = queue.Queue()
         self._worker: threading.Thread | None = None
@@ -42,45 +55,76 @@ class DetectionPage(ctk.CTkFrame):
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=0)
         self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(2, weight=0)
 
-        header = ctk.CTkFrame(self, fg_color=BG_DARK, corner_radius=0)
-        header.grid(row=0, column=0, sticky="ew", pady=(0, 12))
+        self._build_header(self)
+        self._build_body(self)
+        self._build_footer(self)
+
+        self._built = True
+
+    def _build_header(self, parent: ctk.CTkFrame) -> None:
+        header = ctk.CTkFrame(parent, fg_color=CANVAS, corner_radius=0)
+        header.grid(row=0, column=0, sticky="ew", padx=24, pady=(24, 8))
         header.grid_columnconfigure(0, weight=1)
 
-        make_title(header, "Locate your installation").grid(row=0, column=0, sticky="ew", padx=8)
-        make_subtitle(
+        make_section_label(header, "[?]  Locate your installation").grid(
+            row=0, column=0, sticky="ew"
+        )
+        make_hairline(header).grid(row=1, column=0, sticky="ew", pady=(8, 0))
+
+        sub = make_subtitle(
             header,
             "Searching for your Echoes configuration file and game installation. "
             "This usually takes a few seconds.",
-        ).grid(row=1, column=0, sticky="ew", padx=8, pady=(4, 0))
+        )
+        sub.grid(row=2, column=0, sticky="ew", pady=(8, 0))
 
-        body = ctk.CTkFrame(self, fg_color="transparent")
-        body.grid(row=1, column=0, sticky="nsew")
+    def _build_body(self, parent: ctk.CTkFrame) -> None:
+        body = ctk.CTkFrame(parent, fg_color=CANVAS, corner_radius=0)
+        body.grid(row=1, column=0, sticky="nsew", padx=24, pady=8)
         body.grid_columnconfigure(0, weight=1)
         body.grid_rowconfigure(0, weight=0)
         body.grid_rowconfigure(1, weight=0)
         body.grid_rowconfigure(2, weight=1)
 
         self.config_card, self.config_status, self.config_path_lbl, self.config_browse_btn = (
-            self._build_row(body, "Configuration", "UserPreferences.echoes.ini", row=0)
+            self._build_row(body, "[?]  configuration", "UserPreferences.echoes.ini", row=0)
         )
         self.game_card, self.game_status, self.game_path_lbl, self.game_browse_btn = (
-            self._build_row(body, "Game installation", "lotroclient.exe", row=1)
+            self._build_row(body, "[?]  game installation", "lotroclient.exe", row=1)
         )
 
         self.banner = ctk.CTkLabel(
             body,
             text="",
-            fg_color=SURFACE,
-            text_color=TEXT_MUTED,
-            corner_radius=10,
-            padx=14,
-            pady=10,
+            fg_color=CANVAS,
+            text_color=MUTE,
+            corner_radius=4,
+            padx=12,
+            pady=8,
+            font=font(size=13),
             anchor="w",
+            justify="left",
+            wraplength=720,
         )
-        self.banner.grid(row=2, column=0, sticky="new", padx=8, pady=(8, 0))
+        self.banner.grid(row=2, column=0, sticky="new", pady=(12, 0))
 
-        self._built = True
+    def _build_footer(self, parent: ctk.CTkFrame) -> None:
+        footer = ctk.CTkFrame(parent, fg_color=CANVAS, corner_radius=0)
+        footer.grid(row=2, column=0, sticky="ew", padx=24, pady=(0, 24))
+        footer.grid_columnconfigure(0, weight=1)
+
+        make_hairline(footer).grid(row=0, column=0, sticky="ew")
+        hint = ctk.CTkLabel(
+            footer,
+            text="[!]  if auto-detect fails, click Browse to point at the file or folder manually.",
+            font=font(size=13),
+            text_color=MUTE,
+            anchor="w",
+            justify="left",
+        )
+        hint.grid(row=1, column=0, sticky="ew", pady=(8, 0))
 
     def _build_row(
         self,
@@ -90,23 +134,23 @@ class DetectionPage(ctk.CTkFrame):
         row: int,
     ) -> tuple[ctk.CTkFrame, ctk.CTkLabel, ctk.CTkLabel, ctk.CTkButton]:
         card = make_card(parent)
-        card.grid(row=row, column=0, sticky="ew", padx=8, pady=6)
+        card.grid(row=row, column=0, sticky="ew", pady=8)
         card.grid_columnconfigure(1, weight=1)
 
         status = ctk.CTkLabel(
             card,
-            text="...",
-            width=120,
-            font=ctk.CTkFont(size=14, weight="bold"),
-            text_color=TEXT_MUTED,
+            text=MARK_PENDING,
+            width=80,
+            font=font(size=15, weight="bold"),
+            text_color=MUTE,
         )
         status.grid(row=0, column=0, rowspan=2, padx=(16, 12), pady=14)
 
         title_lbl = ctk.CTkLabel(
             card,
             text=title,
-            font=ctk.CTkFont(size=16, weight="bold"),
-            text_color=TEXT,
+            font=heading_font(size=15),
+            text_color=INK,
             anchor="w",
         )
         title_lbl.grid(row=0, column=1, sticky="ew", padx=8, pady=(14, 0))
@@ -114,22 +158,16 @@ class DetectionPage(ctk.CTkFrame):
         path_lbl = ctk.CTkLabel(
             card,
             text=f"Searching for {hint}...",
-            font=ctk.CTkFont(size=12),
-            text_color=TEXT_MUTED,
+            font=font(size=13),
+            text_color=BODY,
             anchor="w",
+            wraplength=520,
+            justify="left",
         )
         path_lbl.grid(row=1, column=1, sticky="ew", padx=8, pady=(0, 14))
 
-        browse_btn = ctk.CTkButton(
-            card,
-            text="Browse",
-            width=110,
-            height=36,
-            fg_color=SURFACE_HOVER,
-            hover_color="#4a4a4a",
-            text_color=TEXT,
-            state="disabled",
-        )
+        browse_btn = make_secondary_button(card, "Browse", lambda: None)
+        browse_btn.configure(state="disabled")
         browse_btn.grid(row=0, column=2, rowspan=2, padx=(8, 16), pady=14)
         return card, status, path_lbl, browse_btn
 
@@ -144,14 +182,14 @@ class DetectionPage(ctk.CTkFrame):
         if config_known:
             self._set_config_found(state.config_path)
         else:
-            self.config_status.configure(text="Searching...", text_color=TEXT_MUTED)
+            self.config_status.configure(text=MARK_PENDING, text_color=MUTE)
             self.config_path_lbl.configure(text="Looking for UserPreferences.echoes.ini...")
 
         if game_known:
             from core.game_detector import is_writable as _iw
             self._set_game_found(state.game_path, writable=_iw(state.game_path))
         else:
-            self.game_status.configure(text="Searching...", text_color=TEXT_MUTED)
+            self.game_status.configure(text=MARK_PENDING, text_color=MUTE)
             self.game_path_lbl.configure(text="Looking for lotroclient.exe...")
 
         if config_known and game_known and state.resolution is not None:
@@ -160,7 +198,7 @@ class DetectionPage(ctk.CTkFrame):
         self._start_detection()
 
     def _reset_banner(self) -> None:
-        self.banner.configure(text="", text_color=TEXT_MUTED)
+        self.banner.configure(text="", text_color=MUTE)
 
     def on_exit(self) -> None:
         return None
@@ -211,7 +249,7 @@ class DetectionPage(ctk.CTkFrame):
                     self.controller.context.resolution = value
                 elif kind == "error":
                     self.banner.configure(
-                        text=f"Detection error: {value}",
+                        text=f"[x]  detection error: {value}",
                         text_color=DANGER,
                     )
         except queue.Empty:
@@ -224,21 +262,21 @@ class DetectionPage(ctk.CTkFrame):
 
     def _set_config_found(self, path: Path) -> None:
         self.controller.context.config_path = path
-        self.config_status.configure(text="FOUND", text_color=SUCCESS)
+        self.config_status.configure(text=MARK_OK, text_color=SUCCESS)
         self.config_path_lbl.configure(text=str(path))
         self.config_browse_btn.configure(state="normal", command=self._browse_config)
         self._evaluate_advance()
 
     def _set_config_missing(self) -> None:
         self.controller.context.config_path = None
-        self.config_status.configure(text="NOT FOUND", text_color=DANGER)
+        self.config_status.configure(text=MARK_FAIL, text_color=DANGER)
         self.config_path_lbl.configure(text="UserPreferences.echoes.ini was not found.")
         self.config_browse_btn.configure(state="normal", command=self._browse_config)
         self._evaluate_advance()
 
     def _set_game_found(self, path: Path, writable: bool | None) -> None:
         self.controller.context.game_path = path
-        self.game_status.configure(text="FOUND", text_color=SUCCESS)
+        self.game_status.configure(text=MARK_OK, text_color=SUCCESS)
         self.game_path_lbl.configure(text=str(path / "lotroclient.exe"))
         self.game_browse_btn.configure(state="normal", command=self._browse_game)
         if writable is not None:
@@ -247,7 +285,7 @@ class DetectionPage(ctk.CTkFrame):
 
     def _set_game_missing(self) -> None:
         self.controller.context.game_path = None
-        self.game_status.configure(text="NOT FOUND", text_color=DANGER)
+        self.game_status.configure(text=MARK_FAIL, text_color=DANGER)
         self.game_path_lbl.configure(text="lotroclient.exe was not found.")
         self.game_browse_btn.configure(state="normal", command=self._browse_game)
         self._evaluate_advance()
@@ -257,13 +295,13 @@ class DetectionPage(ctk.CTkFrame):
         ctx.needs_elevation = not writable
         if writable:
             self.banner.configure(
-                text="Game folder is writable. No elevation needed.",
-                text_color=TEXT_MUTED,
+                text="[+]  game folder is writable, no elevation needed",
+                text_color=MUTE,
             )
         else:
             self.banner.configure(
-                text="Game folder is read-only. The helper will restart with admin rights before installing.",
-                text_color="#fbbf24",
+                text="[!]  game folder is read-only. the helper will restart as administrator before installing.",
+                text_color="#cc7f08",
             )
 
     def _evaluate_advance(self) -> None:

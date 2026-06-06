@@ -3,6 +3,11 @@
 Pages are pre-instantiated and stacked; the controller switches between them with
 tkraise(). A fixed bottom navigation bar is provided by the controller so page
 implementations only render their content.
+
+Design system: OpenCode-faithful. Berkeley Mono typography (Consolas fallback on
+Windows), warm cream canvas, ASCII bracket glyphs, 4px radius on interactive
+elements, 0px on containers. The single dark surface (INK) is reserved for the
+welcome-page hero TUI mockup and the install-page aborted state.
 """
 from __future__ import annotations
 
@@ -15,16 +20,66 @@ import customtkinter as ctk
 
 logger = logging.getLogger(__name__)
 
-ACCENT = "#8A2BE2"
-ACCENT_HOVER = "#9d4ee8"
-BG_DARK = "#1a1a1a"
-SURFACE = "#2a2a2a"
-SURFACE_HOVER = "#3a3a3a"
-TEXT = "#ffffff"
-TEXT_MUTED = "#a0a0a0"
-SUCCESS = "#22c55e"
-DANGER = "#ef4444"
-DANGER_HOVER = "#dc2626"
+
+# --- Brand & accent ---------------------------------------------------------
+INK = "#201d1d"
+INK_DEEP = "#0f0000"
+ON_PRIMARY = "#fdfcfc"
+ON_DARK = "#fdfcfc"
+
+# --- Surface -----------------------------------------------------------------
+CANVAS = "#fdfcfc"
+SURFACE_SOFT = "#f8f7f7"
+SURFACE_CARD = "#f1eeee"
+SURFACE_DARK = "#201d1d"
+SURFACE_DARK_ELEVATED = "#302c2c"
+HAIRLINE = "#ebe3df"
+HAIRLINE_STRONG = "#646262"
+
+# --- Text ladder -------------------------------------------------------------
+CHARCOAL = "#302c2c"
+BODY = "#424245"
+MUTE = "#646262"
+STONE = "#6e6e73"
+ASH = "#9a9898"
+
+# --- Semantic (Apple HIG ramp; used sparingly on marketing chrome) -----------
+ACCENT = "#007aff"
+ACCENT_HOVER = "#0056b3"
+ACCENT_ACTIVE = "#004085"
+DANGER = "#ff3b30"
+DANGER_HOVER = "#d70015"
+DANGER_ACTIVE = "#a50011"
+WARNING = "#ff9f0a"
+WARNING_HOVER = "#cc7f08"
+WARNING_ACTIVE = "#995f06"
+SUCCESS = "#30d158"
+SUCCESS_HOVER = "#28b349"
+SUCCESS_ACTIVE = "#1f8a39"
+
+# --- Typography --------------------------------------------------------------
+# Berkeley Mono is the brand face. On Windows it is not preinstalled, so the
+# fallback is Consolas, which is monospaced, widely deployed, and renders the
+# ASCII block characters correctly. To enable Berkeley, install the font and
+# change this constant to "Berkeley Mono".
+FONT_FAMILY = "Consolas"
+
+DISPLAY_XL = 38
+HEADING_MD = 16
+BODY_MD = 16
+BODY_STRONG_W = 500
+BUTTON_MD = 16
+CAPTION_MD = 14
+
+# --- Radius ------------------------------------------------------------------
+ROUNDED_NONE = 0
+ROUNDED_SM = 4
+ROUNDED_FULL = 9999
+
+# --- Layout ------------------------------------------------------------------
+SECTION_GAP = 96
+BRAND_BAR_HEIGHT = 56
+NAV_BAR_HEIGHT = 72
 
 PAGE_NAMES: tuple[str, ...] = (
     "welcome",
@@ -61,18 +116,30 @@ class WizardState:
     _elevated_attempted: bool = False
 
 
+def font(size: int = BODY_MD, weight: str = "normal") -> ctk.CTkFont:
+    """Build a brand monospace font. weight: 'normal' | 'bold'."""
+    return ctk.CTkFont(family=FONT_FAMILY, size=size, weight=weight)
+
+
+def heading_font(size: int = HEADING_MD) -> ctk.CTkFont:
+    return font(size, "bold")
+
+
+WORDMARK = "[ EVH ]"
+
+
 class WizardController(ctk.CTk):
-    """Top-level application window. Owns the page stack and the nav bar."""
+    """Top-level application window. Owns the page stack, brand bar, and nav bar."""
 
     def __init__(self, initial_state: Optional[WizardState] = None) -> None:
         super().__init__()
 
         self.title("Echoes Vulkan Helper")
-        self.geometry("780x560")
-        self.minsize(720, 520)
-        self.configure(fg_color=BG_DARK)
+        self.geometry("960x680")
+        self.minsize(860, 640)
+        self.configure(fg_color=CANVAS)
 
-        ctk.set_appearance_mode("dark")
+        ctk.set_appearance_mode("light")
         ctk.set_default_color_theme("blue")
 
         self.context: WizardState = initial_state or WizardState()
@@ -82,6 +149,7 @@ class WizardController(ctk.CTk):
 
         self._build_layout()
         self._build_pages()
+        self._build_brand_bar()
         self._build_nav_bar()
         self._show_initial_page()
 
@@ -94,18 +162,71 @@ class WizardController(ctk.CTk):
 
     def _build_layout(self) -> None:
         self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_rowconfigure(1, weight=0)
+        self.grid_rowconfigure(0, weight=0)
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(2, weight=0)
 
-        self._content = ctk.CTkFrame(self, fg_color=BG_DARK, corner_radius=0)
-        self._content.grid(row=0, column=0, sticky="nsew", padx=24, pady=(24, 0))
+        self._brand_bar = ctk.CTkFrame(
+            self,
+            fg_color=CANVAS,
+            corner_radius=ROUNDED_NONE,
+            height=BRAND_BAR_HEIGHT,
+            border_width=1,
+            border_color=HAIRLINE,
+        )
+        self._brand_bar.grid(row=0, column=0, sticky="ew")
+        self._brand_bar.grid_propagate(False)
+        self._brand_bar.grid_columnconfigure(0, weight=0)
+        self._brand_bar.grid_columnconfigure(1, weight=1)
+        self._brand_bar.grid_columnconfigure(2, weight=0)
+
+        self._content = ctk.CTkFrame(self, fg_color=CANVAS, corner_radius=ROUNDED_NONE)
+        self._content.grid(row=1, column=0, sticky="nsew", padx=0, pady=0)
         self._content.grid_columnconfigure(0, weight=1)
         self._content.grid_rowconfigure(0, weight=1)
 
-        self._nav_bar = ctk.CTkFrame(self, fg_color=SURFACE, corner_radius=0, height=72)
-        self._nav_bar.grid(row=1, column=0, sticky="ew", padx=0, pady=0)
-        self._nav_bar.grid_columnconfigure(0, weight=1)
+        self._nav_bar = ctk.CTkFrame(
+            self,
+            fg_color=CANVAS,
+            corner_radius=ROUNDED_NONE,
+            height=NAV_BAR_HEIGHT,
+            border_width=1,
+            border_color=HAIRLINE,
+        )
+        self._nav_bar.grid(row=2, column=0, sticky="ew")
         self._nav_bar.grid_propagate(False)
+        self._nav_bar.grid_columnconfigure(0, weight=0)
+        self._nav_bar.grid_columnconfigure(1, weight=1)
+        self._nav_bar.grid_columnconfigure(2, weight=0)
+        self._nav_bar.grid_columnconfigure(3, weight=0)
+
+    def _build_brand_bar(self) -> None:
+        wordmark = ctk.CTkLabel(
+            self._brand_bar,
+            text=WORDMARK,
+            font=font(size=20, weight="bold"),
+            text_color=INK,
+            anchor="w",
+        )
+        wordmark.grid(row=0, column=0, sticky="w", padx=(20, 12), pady=8)
+
+        name_lbl = ctk.CTkLabel(
+            self._brand_bar,
+            text="Echoes Vulkan Helper",
+            font=heading_font(size=HEADING_MD),
+            text_color=INK,
+            anchor="w",
+        )
+        name_lbl.grid(row=0, column=1, sticky="w", padx=(4, 12))
+
+        version_lbl = ctk.CTkLabel(
+            self._brand_bar,
+            text="v0.1.0  ·  DXVK 2.x",
+            font=font(size=CAPTION_MD),
+            text_color=MUTE,
+            anchor="e",
+        )
+        version_lbl.grid(row=0, column=2, sticky="e", padx=(12, 20))
 
     def _build_pages(self) -> None:
         from wizard.pages.welcome_page import WelcomePage
@@ -131,27 +252,26 @@ class WizardController(ctk.CTk):
         for w in self._nav_bar.winfo_children():
             w.destroy()
 
-        self._nav_bar.grid_columnconfigure(0, weight=0)
-        self._nav_bar.grid_columnconfigure(1, weight=1)
-        self._nav_bar.grid_columnconfigure(2, weight=0)
-        self._nav_bar.grid_columnconfigure(3, weight=0)
-
         self._back_btn = ctk.CTkButton(
             self._nav_bar,
             text="Back",
             width=120,
-            height=44,
-            fg_color=SURFACE_HOVER,
-            hover_color="#4a4a4a",
-            text_color=TEXT,
+            height=36,
+            fg_color=CANVAS,
+            hover_color=SURFACE_SOFT,
+            text_color=INK,
+            font=font(size=BUTTON_MD, weight="normal"),
+            border_width=1,
+            border_color=HAIRLINE_STRONG,
+            corner_radius=ROUNDED_SM,
             command=self._on_back,
         )
 
         self._step_label = ctk.CTkLabel(
             self._nav_bar,
             text="",
-            text_color=TEXT_MUTED,
-            font=ctk.CTkFont(size=13),
+            text_color=MUTE,
+            font=font(size=CAPTION_MD),
         )
         self._step_label.grid(row=0, column=1, sticky="w", padx=16)
 
@@ -159,12 +279,14 @@ class WizardController(ctk.CTk):
             self._nav_bar,
             text="Cancel",
             width=120,
-            height=44,
-            fg_color="transparent",
-            hover_color=SURFACE_HOVER,
-            text_color=TEXT_MUTED,
+            height=36,
+            fg_color=CANVAS,
+            hover_color=SURFACE_SOFT,
+            text_color=MUTE,
             border_width=1,
-            border_color=SURFACE_HOVER,
+            border_color=HAIRLINE_STRONG,
+            corner_radius=ROUNDED_SM,
+            font=font(size=BUTTON_MD, weight="normal"),
             command=self._on_nav_action,
         )
 
@@ -172,11 +294,12 @@ class WizardController(ctk.CTk):
             self._nav_bar,
             text="Next",
             width=160,
-            height=44,
-            fg_color=ACCENT,
-            hover_color=ACCENT_HOVER,
-            text_color=TEXT,
-            font=ctk.CTkFont(size=14, weight="bold"),
+            height=36,
+            fg_color=INK,
+            hover_color=INK_DEEP,
+            text_color=ON_PRIMARY,
+            font=font(size=BUTTON_MD, weight="bold"),
+            corner_radius=ROUNDED_SM,
             command=self._on_next,
         )
 
@@ -191,14 +314,14 @@ class WizardController(ctk.CTk):
 
         total = len(PAGE_NAMES)
         label = PAGE_LABELS.get(name, name.title())
-        self._step_label.configure(text=f"Step {index + 1} of {total}  -  {label}")
+        self._step_label.configure(text=f"step {index + 1}/{total}  ·  {label.lower()}")
 
         is_install = name == "install"
 
         if index == 0 or is_install:
-            self._back_btn.grid_remove()
+            self._back_btn.grid_forget()
         else:
-            self._back_btn.grid(row=0, column=0, padx=(20, 8), pady=14)
+            self._back_btn.grid(row=0, column=0, padx=(20, 8), pady=18)
             self._back_btn.configure(state="normal")
 
         if is_install:
@@ -206,31 +329,33 @@ class WizardController(ctk.CTk):
                 text="Abort",
                 fg_color=DANGER,
                 hover_color=DANGER_HOVER,
-                text_color=TEXT,
+                text_color=ON_PRIMARY,
                 border_width=0,
                 state="normal",
+                font=font(size=BUTTON_MD, weight="bold"),
             )
         else:
             self._cancel_btn.configure(
                 text="Cancel",
-                fg_color="transparent",
-                hover_color=SURFACE_HOVER,
-                text_color=TEXT_MUTED,
+                fg_color=CANVAS,
+                hover_color=SURFACE_SOFT,
+                text_color=MUTE,
                 border_width=1,
-                border_color=SURFACE_HOVER,
+                border_color=HAIRLINE_STRONG,
                 state="normal",
+                font=font(size=BUTTON_MD, weight="normal"),
             )
-        self._cancel_btn.grid(row=0, column=2, padx=8, pady=14)
+        self._cancel_btn.grid(row=0, column=2, padx=8, pady=18)
 
         self._next_btn.configure(state="disabled" if is_install else "normal")
-        self._next_btn.grid(row=0, column=3, padx=(8, 20), pady=14)
+        self._next_btn.grid(row=0, column=3, padx=(8, 20), pady=18)
 
         if name == "summary":
-            self._next_btn.configure(text="Install", state="normal")
+            self._next_btn.configure(text="Install  >", state="normal")
         elif name == "completion":
             self._next_btn.configure(text="Finish", state="normal")
         else:
-            self._next_btn.configure(text="Next")
+            self._next_btn.configure(text="Next  >")
 
         self._refresh_next_state()
 

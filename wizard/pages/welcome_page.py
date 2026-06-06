@@ -15,16 +15,29 @@ import customtkinter as ctk
 from core.backup_manager import create_backup
 from core.gpu_check import check_gpu
 from wizard.controller import (
-    ACCENT,
-    BG_DARK,
+    BODY,
+    CANVAS,
     DANGER,
+    HAIRLINE,
+    INK,
+    MUTE,
+    ON_DARK,
     SUCCESS,
-    SURFACE,
-    SURFACE_HOVER,
-    TEXT,
-    TEXT_MUTED,
+    SURFACE_DARK,
+    SURFACE_SOFT,
+    font,
+    heading_font,
 )
-from wizard.pages._common import make_subtitle, make_title
+from wizard.pages._common import (
+    MARK_OK,
+    MARK_PENDING,
+    make_ascii_bullet,
+    make_dark_card,
+    make_hairline,
+    make_section_label,
+    make_soft_card,
+    make_subtitle,
+)
 
 if TYPE_CHECKING:
     from wizard.controller import WizardController, WizardState
@@ -34,9 +47,27 @@ logger = logging.getLogger(__name__)
 CONFIG_RELATIVE = Path("Lord of the Rings Online") / "UserPreferences.echoes.ini"
 
 
+TUI_HERO_LINES: tuple[str, ...] = (
+    "",
+    "  ECHOES VULKAN HELPER",
+    "  ─────────────────────",
+    "",
+    "  [+]  detect config and game install",
+    "  [+]  back up files",
+    "  [+]  install dxvk vulkan layer",
+    "  [+]  apply recommended settings",
+    "  [+]  verify",
+    "",
+    "  $ run install",
+    "  > ready",
+    "",
+    "  tab  next  ·  ctrl-p  abort",
+)
+
+
 class WelcomePage(ctk.CTkFrame):
     def __init__(self, parent: ctk.CTkFrame, controller: "WizardController") -> None:
-        super().__init__(parent, fg_color=BG_DARK, corner_radius=0)
+        super().__init__(parent, fg_color=CANVAS, corner_radius=0)
         self.controller = controller
         self._gpu_q: queue.Queue = queue.Queue()
         self._gpu_worker: threading.Thread | None = None
@@ -45,36 +76,82 @@ class WelcomePage(ctk.CTkFrame):
 
     def _build(self) -> None:
         self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_rowconfigure(1, weight=0)
+        self.grid_rowconfigure(0, weight=0)
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(2, weight=0)
 
-        body = ctk.CTkFrame(self, fg_color=BG_DARK, corner_radius=0)
-        body.grid(row=0, column=0, sticky="nsew", pady=(20, 0))
+        self._build_hero(self)
+        self._build_body(self)
+        self._build_footer(self)
+
+    def _build_hero(self, parent: ctk.CTkFrame) -> None:
+        hero = make_dark_card(parent)
+        hero.grid(row=0, column=0, sticky="ew", padx=0, pady=0)
+        hero.grid_columnconfigure(0, weight=1)
+
+        tui_text = "\n".join(TUI_HERO_LINES)
+        tui = ctk.CTkLabel(
+            hero,
+            text=tui_text,
+            font=font(size=12, weight="normal"),
+            text_color=ON_DARK,
+            anchor="w",
+            justify="left",
+        )
+        tui.grid(row=0, column=0, sticky="ew", padx=24, pady=18)
+
+    def _build_body(self, parent: ctk.CTkFrame) -> None:
+        body = ctk.CTkFrame(parent, fg_color=CANVAS, corner_radius=0)
+        body.grid(row=1, column=0, sticky="nsew", padx=24, pady=12)
         body.grid_columnconfigure(0, weight=1)
         body.grid_rowconfigure(0, weight=0)
         body.grid_rowconfigure(1, weight=0)
-        body.grid_rowconfigure(2, weight=0)
-        body.grid_rowconfigure(3, weight=1)
+        body.grid_rowconfigure(2, weight=1)
+        body.grid_rowconfigure(3, weight=0)
 
-        title = make_title(body, "Echoes Vulkan Helper")
-        title.grid(row=0, column=0, sticky="ew", padx=8, pady=(0, 8))
+        header = ctk.CTkFrame(body, fg_color=CANVAS, corner_radius=0)
+        header.grid(row=0, column=0, sticky="ew", pady=(0, 4))
+        header.grid_columnconfigure(0, weight=1)
+
+        make_section_label(header, "[+]  What this wizard does").grid(
+            row=0, column=0, sticky="ew", padx=0
+        )
+        make_hairline(header).grid(row=1, column=0, sticky="ew", pady=(8, 0))
 
         intro = make_subtitle(
             body,
-            "This wizard will configure LOTRO: Echoes of Angmar with the recommended "
-            "Vulkan compatibility layer in a few clicks.",
+            "Configure LOTRO: Echoes of Angmar with the recommended Vulkan "
+            "compatibility layer in a few clicks. Backups are created "
+            "automatically. Nothing is deleted.",
         )
-        intro.grid(row=1, column=0, sticky="ew", padx=8, pady=(0, 16))
+        intro.grid(row=1, column=0, sticky="ew", pady=(8, 12))
 
-        self._gpu_card, self._gpu_status, self._gpu_name_lbl = self._build_gpu_card(body)
-        self._gpu_card.grid(row=2, column=0, sticky="ew", padx=8, pady=(0, 12))
+        stack = ctk.CTkFrame(body, fg_color=CANVAS, corner_radius=0)
+        stack.grid(row=2, column=0, sticky="nsew")
+        stack.grid_columnconfigure(0, weight=1)
+        stack.grid_rowconfigure(0, weight=0)
+        stack.grid_rowconfigure(1, weight=1)
 
-        checks = ctk.CTkFrame(body, fg_color=SURFACE, corner_radius=12)
-        checks.grid(row=3, column=0, sticky="nsew", padx=8, pady=(0, 8))
-        checks.grid_columnconfigure(0, weight=1)
+        self._gpu_card, self._gpu_status, self._gpu_name_lbl = self._build_gpu_card(stack)
+        self._gpu_card.grid(row=0, column=0, sticky="ew", pady=(0, 12))
 
-        self._step_labels: list[ctk.CTkLabel] = []
-        self._step_marks: list[ctk.CTkLabel] = []
+        self._step_rows_frame = self._build_step_rows(stack)
+        self._step_rows_frame.grid(row=1, column=0, sticky="nsew")
+
+        reassurance = ctk.CTkLabel(
+            body,
+            text="No existing files will be deleted. Backups are created automatically.",
+            font=font(size=13),
+            text_color=MUTE,
+            anchor="w",
+            justify="left",
+        )
+        reassurance.grid(row=3, column=0, sticky="ew", pady=(8, 0))
+
+    def _build_step_rows(self, parent: ctk.CTkFrame) -> ctk.CTkFrame:
+        card = make_soft_card(parent)
+        card.grid_columnconfigure(0, weight=0)
+        card.grid_columnconfigure(1, weight=1)
         step_texts = [
             "Detect your configuration and game folder",
             "Review the changes that will be made",
@@ -82,114 +159,45 @@ class WelcomePage(ctk.CTkFrame):
             "Install Vulkan compatibility files",
             "Verify the installation",
         ]
+        self._step_marks: list[ctk.CTkLabel] = []
         for i, text in enumerate(step_texts):
-            row = ctk.CTkFrame(checks, fg_color="transparent")
-            row.grid(row=i, column=0, sticky="ew", padx=20, pady=10)
+            row = ctk.CTkFrame(card, fg_color="transparent")
+            row.grid(row=i, column=0, columnspan=2, sticky="ew", padx=16, pady=6)
             row.grid_columnconfigure(0, weight=0)
             row.grid_columnconfigure(1, weight=1)
-            mark = ctk.CTkLabel(
-                row,
-                text="\u2022",
-                font=ctk.CTkFont(size=18),
-                text_color=TEXT_MUTED,
-                width=20,
-            )
+            mark = make_ascii_bullet(row, MARK_PENDING, color=MUTE)
             mark.grid(row=0, column=0, padx=(0, 12))
             lbl = ctk.CTkLabel(
                 row,
                 text=text,
-                font=ctk.CTkFont(size=15),
-                text_color=TEXT,
+                font=font(size=14),
+                text_color=INK,
                 anchor="w",
             )
             lbl.grid(row=0, column=1, sticky="ew")
-            self._step_labels.append(lbl)
             self._step_marks.append(mark)
-
-        reassurance = ctk.CTkLabel(
-            body,
-            text="No existing files will be deleted. Backups are created automatically.",
-            font=ctk.CTkFont(size=13),
-            text_color=TEXT_MUTED,
-        )
-        reassurance.grid(row=4, column=0, sticky="ew", padx=8, pady=(8, 0))
-
-        footer = ctk.CTkFrame(self, fg_color="transparent")
-        footer.grid(row=1, column=0, sticky="ew", pady=(16, 0))
-        footer.grid_columnconfigure(0, weight=1)
-        footer.grid_columnconfigure(1, weight=0)
-
-        self._tools_toggle = ctk.CTkButton(
-            footer,
-            text="Troubleshoot \u25BE",
-            fg_color="transparent",
-            hover_color=SURFACE_HOVER,
-            text_color=TEXT_MUTED,
-            width=200,
-            height=32,
-            command=self._toggle_tools,
-        )
-        self._tools_toggle.grid(row=0, column=0, sticky="w", padx=8)
-
-        self._tools_panel = ctk.CTkFrame(footer, fg_color="transparent")
-        self._tools_panel.grid_columnconfigure(0, weight=1)
-        self._tools_panel.grid_columnconfigure(1, weight=1)
-
-        restore_link = ctk.CTkButton(
-            self._tools_panel,
-            text="Restore from a previous backup",
-            fg_color=SURFACE_HOVER,
-            hover_color="#4a4a4a",
-            text_color=TEXT,
-            height=36,
-            command=self._on_restore_clicked,
-        )
-        restore_link.grid(row=0, column=0, sticky="ew", padx=4, pady=4)
-
-        uninstall_link = ctk.CTkButton(
-            self._tools_panel,
-            text="Uninstall Vulkan helper",
-            fg_color=SURFACE_HOVER,
-            hover_color="#4a4a4a",
-            text_color=TEXT,
-            height=36,
-            command=self._on_uninstall_clicked,
-        )
-        uninstall_link.grid(row=0, column=1, sticky="ew", padx=4, pady=4)
-
-    def _toggle_tools(self) -> None:
-        self._tools_expanded = not self._tools_expanded
-        if self._tools_expanded:
-            self._tools_panel.grid(row=1, column=0, columnspan=2, sticky="ew", padx=8, pady=(8, 0))
-            self._tools_toggle.configure(text="Troubleshoot \u25B4")
-        else:
-            self._tools_panel.grid_forget()
-            self._tools_toggle.configure(text="Troubleshoot \u25BE")
-
-    def _mark_step_done(self, index: int) -> None:
-        if 0 <= index < len(self._step_marks):
-            self._step_marks[index].configure(text="\u2713", text_color=SUCCESS)
+        return card
 
     def _build_gpu_card(
         self, parent: ctk.CTkFrame
     ) -> tuple[ctk.CTkFrame, ctk.CTkLabel, ctk.CTkLabel]:
-        card = ctk.CTkFrame(parent, fg_color=SURFACE, corner_radius=12)
+        card = make_soft_card(parent)
         card.grid_columnconfigure(1, weight=1)
 
         status = ctk.CTkLabel(
             card,
-            text="Checking...",
-            width=120,
-            font=ctk.CTkFont(size=14, weight="bold"),
-            text_color=TEXT_MUTED,
+            text="[...]",
+            width=80,
+            font=font(size=14, weight="bold"),
+            text_color=MUTE,
         )
         status.grid(row=0, column=0, rowspan=2, padx=(16, 12), pady=14)
 
         title_lbl = ctk.CTkLabel(
             card,
-            text="Graphics adapter",
-            font=ctk.CTkFont(size=16, weight="bold"),
-            text_color=TEXT,
+            text="[?]  graphics adapter",
+            font=heading_font(size=15),
+            text_color=INK,
             anchor="w",
         )
         title_lbl.grid(row=0, column=1, sticky="ew", padx=8, pady=(14, 0))
@@ -197,8 +205,8 @@ class WelcomePage(ctk.CTkFrame):
         name_lbl = ctk.CTkLabel(
             card,
             text="Detecting your GPU and Vulkan runtime...",
-            font=ctk.CTkFont(size=12),
-            text_color=TEXT_MUTED,
+            font=font(size=12),
+            text_color=BODY,
             anchor="w",
             wraplength=520,
             justify="left",
@@ -206,6 +214,63 @@ class WelcomePage(ctk.CTkFrame):
         name_lbl.grid(row=1, column=1, sticky="ew", padx=8, pady=(0, 14))
 
         return card, status, name_lbl
+
+    def _build_footer(self, parent: ctk.CTkFrame) -> None:
+        footer = ctk.CTkFrame(parent, fg_color=CANVAS, corner_radius=0)
+        footer.grid(row=2, column=0, sticky="ew", padx=24, pady=(0, 12))
+        footer.grid_columnconfigure(0, weight=1)
+        footer.grid_columnconfigure(1, weight=1)
+
+        self._tools_toggle = ctk.CTkButton(
+            footer,
+            text="[+]  troubleshoot",
+            fg_color=CANVAS,
+            hover_color=SURFACE_SOFT,
+            text_color=MUTE,
+            font=font(size=13, weight="normal"),
+            width=180,
+            height=32,
+            border_width=1,
+            border_color=HAIRLINE,
+            corner_radius=4,
+            command=self._toggle_tools,
+        )
+        self._tools_toggle.grid(row=0, column=0, sticky="w")
+
+        self._tools_panel = ctk.CTkFrame(footer, fg_color="transparent")
+        self._tools_panel.grid_columnconfigure(0, weight=1)
+        self._tools_panel.grid_columnconfigure(1, weight=1)
+
+        from wizard.pages._common import make_secondary_button
+
+        restore_btn = make_secondary_button(
+            self._tools_panel,
+            "[-]  restore from previous backup",
+            self._on_restore_clicked,
+        )
+        restore_btn.grid(row=0, column=0, sticky="ew", padx=(0, 4), pady=4)
+
+        uninstall_btn = make_secondary_button(
+            self._tools_panel,
+            "[-]  uninstall vulkan helper",
+            self._on_uninstall_clicked,
+        )
+        uninstall_btn.grid(row=0, column=1, sticky="ew", padx=(4, 0), pady=4)
+
+    def _toggle_tools(self) -> None:
+        self._tools_expanded = not self._tools_expanded
+        if self._tools_expanded:
+            self._tools_panel.grid(
+                row=1, column=0, columnspan=2, sticky="ew", pady=(8, 0)
+            )
+            self._tools_toggle.configure(text="[-]  troubleshoot")
+        else:
+            self._tools_panel.grid_forget()
+            self._tools_toggle.configure(text="[+]  troubleshoot")
+
+    def _mark_step_done(self, index: int) -> None:
+        if 0 <= index < len(self._step_marks):
+            self._step_marks[index].configure(text="[x]", text_color=SUCCESS)
 
     def on_enter(self, state: "WizardState") -> None:
         state.gpu_check_done = False
@@ -221,10 +286,10 @@ class WelcomePage(ctk.CTkFrame):
         return state.gpu_check_done and state.gpu_check_ok
 
     def _set_gpu_checking(self) -> None:
-        self._gpu_status.configure(text="Checking...", text_color=TEXT_MUTED)
+        self._gpu_status.configure(text="[...]", text_color=MUTE)
         self._gpu_name_lbl.configure(
             text="Detecting your GPU and Vulkan runtime...",
-            text_color=TEXT_MUTED,
+            text_color=BODY,
         )
 
     def _start_gpu_check(self) -> None:
@@ -261,13 +326,13 @@ class WelcomePage(ctk.CTkFrame):
         state.gpu_check_done = True
         state.gpu_check_ok = bool(result.ok)
         if result.ok:
-            self._gpu_status.configure(text="OK", text_color=SUCCESS)
+            self._gpu_status.configure(text="[+]", text_color=SUCCESS)
             self._gpu_name_lbl.configure(
                 text=f"{result.name}  -  {result.reason}",
-                text_color=TEXT,
+                text_color=INK,
             )
         else:
-            self._gpu_status.configure(text="FAIL", text_color=DANGER)
+            self._gpu_status.configure(text="[x]", text_color=DANGER)
             self._gpu_name_lbl.configure(
                 text=f"{result.name}  -  {result.reason}",
                 text_color=DANGER,
@@ -278,7 +343,7 @@ class WelcomePage(ctk.CTkFrame):
         state: "WizardState" = self.controller.context
         state.gpu_check_done = True
         state.gpu_check_ok = False
-        self._gpu_status.configure(text="FAIL", text_color=DANGER)
+        self._gpu_status.configure(text="[x]", text_color=DANGER)
         self._gpu_name_lbl.configure(
             text=f"GPU check failed: {message}",
             text_color=DANGER,
@@ -332,7 +397,7 @@ class WelcomePage(ctk.CTkFrame):
         except (OSError, configparser.Error) as exc:
             raise ValueError(f"Could not parse as INI: {exc}") from exc
         if not parser.sections():
-            raise ValueError("File has no sections — not a valid Echoes config.")
+            raise ValueError("File has no sections - not a valid Echoes config.")
 
     def _confirm_restore(self, src: Path, target: Path) -> bool:
         from tkinter import messagebox
@@ -388,11 +453,12 @@ class WelcomePage(ctk.CTkFrame):
         toast = ctk.CTkLabel(
             self,
             text=message,
-            fg_color=SURFACE_HOVER,
-            text_color=TEXT,
-            corner_radius=8,
+            fg_color=SURFACE_DARK,
+            text_color=ON_DARK,
+            corner_radius=4,
             padx=12,
             pady=8,
+            font=font(size=13),
         )
         toast.place(relx=0.5, rely=0.92, anchor="center")
         self.after(2500, toast.destroy)

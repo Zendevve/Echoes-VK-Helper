@@ -7,15 +7,24 @@ from typing import TYPE_CHECKING
 import customtkinter as ctk
 
 from wizard.controller import (
-    ACCENT,
-    BG_DARK,
+    ACCENT_HOVER,
+    BODY,
+    CANVAS,
+    INK,
+    MUTE,
     SUCCESS,
-    SURFACE_HOVER,
-    TEXT,
-    TEXT_MUTED,
+    SURFACE_CARD,
     WizardState,
+    font,
+    heading_font,
 )
-from wizard.pages._common import make_card, make_subtitle, make_title
+from wizard.pages._common import (
+    MARK_OK,
+    make_card,
+    make_hairline,
+    make_section_label,
+    make_subtitle,
+)
 
 if TYPE_CHECKING:
     from wizard.controller import WizardController
@@ -25,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 class SummaryPage(ctk.CTkFrame):
     def __init__(self, parent: ctk.CTkFrame, controller: "WizardController") -> None:
-        super().__init__(parent, fg_color=BG_DARK, corner_radius=0)
+        super().__init__(parent, fg_color=CANVAS, corner_radius=0)
         self.controller = controller
         self._resolution_options: list[tuple[int, int]] = []
         self._build()
@@ -35,25 +44,32 @@ class SummaryPage(ctk.CTkFrame):
         self.grid_rowconfigure(0, weight=0)
         self.grid_rowconfigure(1, weight=1)
 
-        header = ctk.CTkFrame(self, fg_color=BG_DARK, corner_radius=0)
-        header.grid(row=0, column=0, sticky="ew")
+        self._build_header(self)
+        self._build_body(self)
+
+    def _build_header(self, parent: ctk.CTkFrame) -> None:
+        header = ctk.CTkFrame(parent, fg_color=CANVAS, corner_radius=0)
+        header.grid(row=0, column=0, sticky="ew", padx=24, pady=(24, 8))
         header.grid_columnconfigure(0, weight=1)
-        make_title(header, "Review changes").grid(row=0, column=0, sticky="ew", padx=8)
+
+        make_section_label(header, "[+]  Review changes").grid(
+            row=0, column=0, sticky="ew"
+        )
+        make_hairline(header).grid(row=1, column=0, sticky="ew", pady=(8, 0))
         make_subtitle(
             header,
             "The following changes will be applied. Click Install to continue.",
-        ).grid(row=1, column=0, sticky="ew", padx=8, pady=(4, 12))
+        ).grid(row=2, column=0, sticky="ew", pady=(8, 0))
 
-        body = ctk.CTkScrollableFrame(self, fg_color="transparent")
-        body.grid(row=1, column=0, sticky="nsew")
+    def _build_body(self, parent: ctk.CTkFrame) -> None:
+        body = ctk.CTkScrollableFrame(parent, fg_color=CANVAS, corner_radius=0)
+        body.grid(row=1, column=0, sticky="nsew", padx=24, pady=8)
         body.grid_columnconfigure(0, weight=1)
 
-        self.config_card = self._build_section(
-            body, "Configuration changes", row=0
-        )
-        self.files_card = self._build_section(body, "Files to install", row=1)
-        self.backup_card = self._build_section(body, "Backups to create", row=2)
-        self.monitor_card = self._build_section(body, "Display", row=3)
+        self.config_card = self._build_section(body, "[+]  configuration changes", row=0)
+        self.files_card = self._build_section(body, "[+]  files to install", row=1)
+        self.backup_card = self._build_section(body, "[+]  backups to create", row=2)
+        self.monitor_card = self._build_section(body, "[?]  display", row=3)
 
         self._populate_config_rows()
         self._populate_files_rows()
@@ -62,18 +78,22 @@ class SummaryPage(ctk.CTkFrame):
 
     def _build_section(self, parent: ctk.CTkScrollableFrame, title: str, row: int) -> ctk.CTkFrame:
         card = make_card(parent)
-        card.grid(row=row, column=0, sticky="ew", padx=8, pady=6)
+        card.grid(row=row, column=0, sticky="ew", pady=8)
         card.grid_columnconfigure(0, weight=1)
+
         lbl = ctk.CTkLabel(
             card,
             text=title,
-            font=ctk.CTkFont(size=15, weight="bold"),
-            text_color=TEXT,
+            font=heading_font(size=15),
+            text_color=INK,
             anchor="w",
         )
-        lbl.grid(row=0, column=0, sticky="ew", padx=16, pady=(12, 6))
-        body = ctk.CTkFrame(card, fg_color="transparent")
-        body.grid(row=1, column=0, sticky="ew", padx=16, pady=(0, 12))
+        lbl.grid(row=0, column=0, sticky="ew", padx=16, pady=(14, 8))
+
+        make_hairline(card).grid(row=1, column=0, sticky="ew", padx=16)
+
+        body = ctk.CTkFrame(card, fg_color=CANVAS, corner_radius=0)
+        body.grid(row=2, column=0, sticky="ew", padx=16, pady=(0, 14))
         body.grid_columnconfigure(0, weight=1)
         return body
 
@@ -83,40 +103,37 @@ class SummaryPage(ctk.CTkFrame):
             val = ctk.CTkLabel(
                 row,
                 text=value,
-                font=ctk.CTkFont(size=14),
-                text_color=TEXT_MUTED,
+                font=font(size=14),
+                text_color=INK,
                 anchor="e",
             )
             val.grid(row=0, column=2, sticky="e", padx=(8, 0))
         return row
 
     def _build_check_row(self, parent: ctk.CTkFrame, text: str) -> ctk.CTkFrame:
-        """Build the standard OK + label row. Returns the frame so callers can
-        attach a trailing widget (e.g. resolution dropdown) in column 2."""
         row = ctk.CTkFrame(parent, fg_color="transparent")
-        row.pack(fill="x", pady=2)
+        row.pack(fill="x", pady=4)
         row.grid_columnconfigure(0, weight=0)
         row.grid_columnconfigure(1, weight=1)
         mark = ctk.CTkLabel(
             row,
-            text="OK",
-            font=ctk.CTkFont(size=12, weight="bold"),
+            text=MARK_OK,
+            font=font(size=14, weight="bold"),
             text_color=SUCCESS,
-            width=24,
+            width=36,
         )
         mark.grid(row=0, column=0, padx=(0, 8))
         lbl = ctk.CTkLabel(
             row,
             text=text,
-            font=ctk.CTkFont(size=14),
-            text_color=TEXT,
+            font=font(size=14),
+            text_color=BODY,
             anchor="w",
         )
         lbl.grid(row=0, column=1, sticky="ew")
         return row
 
     def _populate_config_rows(self) -> None:
-        state = self.controller.context
         self._row(self.config_card, "Fullscreen", "True")
         self._row(self.config_card, "ConfineFullScreenMouseCursor", "False")
         self._res_value_lbl = self._add_value_row(self.config_card, "Resolution")
@@ -132,8 +149,8 @@ class SummaryPage(ctk.CTkFrame):
         lbl = ctk.CTkLabel(
             row,
             text=val,
-            font=ctk.CTkFont(size=14, weight="bold"),
-            text_color=TEXT,
+            font=font(size=14, weight="bold"),
+            text_color=INK,
             anchor="e",
         )
         lbl.grid(row=0, column=2, sticky="e", padx=(8, 0))
@@ -165,11 +182,15 @@ class SummaryPage(ctk.CTkFrame):
             row,
             variable=self._res_var,
             values=[f"{w}x{h}" for w, h in modes],
-            width=140,
-            fg_color=SURFACE_HOVER,
-            button_color=ACCENT,
-            button_hover_color="#9d4ee8",
-            text_color=TEXT,
+            width=160,
+            fg_color=SURFACE_CARD,
+            button_color=INK,
+            button_hover_color=ACCENT_HOVER,
+            text_color=INK,
+            dropdown_fg_color=CANVAS,
+            dropdown_text_color=INK,
+            dropdown_hover_color=SURFACE_CARD,
+            font=font(size=14, weight="normal"),
             command=self._on_resolution_change,
         )
         self._res_menu.grid(row=0, column=2, sticky="e")
@@ -192,6 +213,8 @@ class SummaryPage(ctk.CTkFrame):
         if hasattr(self, "_res_var"):
             current = f"{state.resolution[0]}x{state.resolution[1]}"
             self._res_var.set(current)
+        if getattr(self, "_res_value_lbl", None) is not None:
+            self._res_value_lbl.configure(text=current)
 
     def on_exit(self) -> None:
         return None
