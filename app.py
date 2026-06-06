@@ -76,7 +76,7 @@ def main() -> int:
         from wizard.controller import WizardController, WizardState
 
         state_kwargs = _hydrate_state_from_resume() or {}
-        initial_state = WizardState(**state_kwargs)
+        initial_state = WizardState.from_dict(state_kwargs)
 
         app = WizardController(initial_state=initial_state)
         app.mainloop()

@@ -107,7 +107,7 @@ class WizardState:
     resolution: tuple[int, int] | None = None
     detection_errors: list[str] = field(default_factory=list)
     needs_elevation: bool = False
-    backup_paths: list[str] = field(default_factory=list)
+    backup_paths: list[Path] = field(default_factory=list)
     validation: dict[str, Any] | None = None
     install_succeeded: bool = False
     gpu_check_done: bool = False
@@ -116,6 +116,67 @@ class WizardState:
     aborted: bool = False
     _resume_install: bool = False
     _elevated_attempted: bool = False
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any] | None) -> "WizardState":
+        """Build a WizardState from a raw dict, coercing string paths to Path.
+
+        The on-disk and resume-payload schemas are stringly-typed. Constructing
+        a WizardState directly with **kwargs would store strings in fields
+        typed `Path | None`, which silently breaks every `.is_file()` /
+        `.parent` call downstream. This classmethod is the single trusted
+        boundary between untrusted dicts and the typed dataclass.
+
+        Unknown keys are ignored so the on-disk schema can grow without
+        breaking older callers. Invalid values fall back to the dataclass
+        defaults rather than raising.
+        """
+
+        def _to_path(value: Any) -> Path | None:
+            if value is None or value == "":
+                return None
+            if isinstance(value, Path):
+                return value
+            if isinstance(value, str):
+                return Path(value)
+            return None
+
+        def _to_path_list(value: Any) -> list[Path]:
+            if not isinstance(value, list):
+                return []
+            out: list[Path] = []
+            for item in value:
+                if isinstance(item, Path):
+                    out.append(item)
+                elif isinstance(item, str) and item:
+                    out.append(Path(item))
+            return out
+
+        if not isinstance(data, dict):
+            return cls()
+
+        raw_res = data.get("resolution")
+        resolution: tuple[int, int] | None = None
+        if isinstance(raw_res, (list, tuple)) and len(raw_res) == 2:
+            try:
+                resolution = (int(raw_res[0]), int(raw_res[1]))
+            except (TypeError, ValueError):
+                resolution = None
+
+        return cls(
+            config_path=_to_path(data.get("config_path")),
+            game_path=_to_path(data.get("game_path")),
+            resolution=resolution,
+            detection_errors=list(data.get("detection_errors") or []),
+            needs_elevation=bool(data.get("needs_elevation", False)),
+            backup_paths=_to_path_list(data.get("backup_paths")),
+            validation=data.get("validation") if isinstance(data.get("validation"), dict) else None,
+            install_succeeded=bool(data.get("install_succeeded", False)),
+            gpu_check_done=bool(data.get("gpu_check_done", False)),
+            gpu_check_ok=bool(data.get("gpu_check_ok", False)),
+            vulkan_install_result=data.get("vulkan_install_result"),
+            aborted=bool(data.get("aborted", False)),
+        )
 
 
 def font(size: int = BODY_MD, weight: str = "normal") -> ctk.CTkFont:

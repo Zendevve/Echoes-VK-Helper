@@ -331,7 +331,7 @@ class InstallPage(ctk.CTkFrame):
 
         backup = create_backup(state.config_path)
         self._q.put(("log", f"    - rotated {state.config_path.name} -> {backup.name}"))
-        state.backup_paths.append(str(backup))
+        state.backup_paths.append(backup)
 
     def _run_step_resolution(self, state: WizardState) -> None:
         if state.resolution is not None:
