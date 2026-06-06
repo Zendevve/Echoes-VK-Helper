@@ -18,7 +18,6 @@ import logging
 import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional
 
 from core.backup_manager import restore_backup
 from core.vulkan_installer import VULKAN_FILES, find_latest_backup
@@ -30,7 +29,7 @@ logger = logging.getLogger(__name__)
 class FileOutcome:
     name: str
     action: str  # "restored_from_backup" | "removed" | "skipped"
-    error: Optional[str] = None
+    error: str | None = None
 
 
 @dataclass

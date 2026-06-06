@@ -14,7 +14,6 @@ from wizard.controller import (
     BODY,
     CANVAS,
     DANGER,
-    HAIRLINE,
     INK,
     MUTE,
     SUCCESS,
@@ -27,10 +26,8 @@ from wizard.pages._common import (
     MARK_FAIL,
     MARK_OK,
     MARK_PENDING,
-    make_ascii_bullet,
     make_card,
     make_hairline,
-    make_install_snippet,
     make_secondary_button,
     make_section_label,
     make_subtitle,
@@ -44,7 +41,7 @@ logger = logging.getLogger(__name__)
 
 
 class DetectionPage(ctk.CTkFrame):
-    def __init__(self, parent: ctk.CTkFrame, controller: "WizardController") -> None:
+    def __init__(self, parent: ctk.CTkFrame, controller: WizardController) -> None:
         super().__init__(parent, fg_color=CANVAS, corner_radius=0)
         self.controller = controller
         self._q: queue.Queue = queue.Queue()
@@ -226,7 +223,7 @@ class DetectionPage(ctk.CTkFrame):
                     writable = is_writable(game)
                     self._q.put(("writable", writable))
                 self._q.put(("resolution", get_native_resolution()))
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 logger.exception("Detection worker failed: %s", exc)
                 self._q.put(("error", exc))
 
@@ -351,7 +348,7 @@ class DetectionPage(ctk.CTkFrame):
             from wizard.persistence import save_state
 
             save_state(self.controller.context)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             logger.warning("Failed to persist detection state: %s", exc)
 
     def _browse_game(self) -> None:

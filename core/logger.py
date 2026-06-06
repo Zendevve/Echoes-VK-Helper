@@ -17,7 +17,7 @@ _initialized = False
 class _UiQueueHandler(QueueHandler):
     """Pushes formatted records onto a shared queue for the wizard's install page."""
 
-    def __init__(self, ui_queue: "queue.Queue") -> None:
+    def __init__(self, ui_queue: queue.Queue) -> None:
         super().__init__(ui_queue)
         self.setFormatter(logging.Formatter(_LOG_FORMAT, _DATE_FORMAT))
 
@@ -88,7 +88,7 @@ def setup_logging(log_dir: Path) -> logging.Logger:
     return root
 
 
-def attach_ui_queue(ui_queue: "queue.Queue") -> None:
+def attach_ui_queue(ui_queue: queue.Queue) -> None:
     """Attach a queue handler so the install page can render logs live."""
     root = logging.getLogger()
     for h in list(root.handlers):

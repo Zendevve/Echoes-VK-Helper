@@ -13,11 +13,9 @@ from wizard.controller import (
     CANVAS,
     DANGER,
     INK,
-    ON_DARK,
     SUCCESS,
     WizardState,
     font,
-    heading_font,
 )
 from wizard.pages._common import (
     MARK_FAIL,
@@ -27,8 +25,8 @@ from wizard.pages._common import (
     make_hairline,
     make_open_folder_button,
     make_primary_button,
-    make_section_label,
     make_secondary_button,
+    make_section_label,
     make_subtitle,
 )
 
@@ -39,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 
 class CompletionPage(ctk.CTkFrame):
-    def __init__(self, parent: ctk.CTkFrame, controller: "WizardController") -> None:
+    def __init__(self, parent: ctk.CTkFrame, controller: WizardController) -> None:
         super().__init__(parent, fg_color=CANVAS, corner_radius=0)
         self.controller = controller
         self._built = False

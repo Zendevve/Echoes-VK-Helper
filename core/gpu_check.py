@@ -41,7 +41,7 @@ class GpuCheckResult:
 _VK_SUCCESS = 0
 
 
-class _DISPLAY_DEVICEW(ctypes.Structure):
+class _DisplayDeviceW(ctypes.Structure):
     _fields_ = [
         ("cb", wintypes.DWORD),
         ("DeviceName", ctypes.c_wchar * 32),
@@ -104,14 +104,14 @@ def _query_display_device() -> str:
         enum_proc.argtypes = [
             wintypes.LPCWSTR,
             wintypes.DWORD,
-            ctypes.POINTER(_DISPLAY_DEVICEW),
+            ctypes.POINTER(_DisplayDeviceW),
             wintypes.DWORD,
         ]
     except AttributeError:
         return ""
 
-    info = _DISPLAY_DEVICEW()
-    info.cb = ctypes.sizeof(_DISPLAY_DEVICEW)
+    info = _DisplayDeviceW()
+    info.cb = ctypes.sizeof(_DisplayDeviceW)
     if not enum_proc(None, 0, ctypes.byref(info), 0):
         return ""
     name = (info.DeviceString or "").strip()
@@ -157,7 +157,7 @@ def check_gpu() -> GpuCheckResult:
             ),
             api_version=0,
         )
-    except Exception as exc:  # noqa: BLE001 - last-resort safety net
+    except Exception as exc:
         logger.exception("Unexpected error in check_gpu: %s", exc)
         return GpuCheckResult(
             ok=False,

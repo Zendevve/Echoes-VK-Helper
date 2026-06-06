@@ -1,6 +1,7 @@
 """UAC elevation: relaunch the helper with admin rights while preserving state."""
 from __future__ import annotations
 
+import contextlib
 import ctypes
 import json
 import logging
@@ -67,8 +68,8 @@ def relaunch_as_admin(state: Any) -> None:
         state["_elevated_attempted"] = True
     else:
         try:
-            setattr(state, "needs_elevation", False)
-            setattr(state, "_elevated_attempted", True)
+            state.needs_elevation = False
+            state._elevated_attempted = True
         except AttributeError:
             pass
 
@@ -84,21 +85,19 @@ def relaunch_as_admin(state: Any) -> None:
 
     logger.info("Requesting UAC elevation: %s %s", exe, params)
 
-    SW_SHOWNORMAL = 1
+    sw_shownormal = 1
     rc = int(ctypes.windll.shell32.ShellExecuteW(
         None,
         "runas",
         exe,
         params,
         None,
-        SW_SHOWNORMAL,
+        sw_shownormal,
     ))
     if rc <= 32 or rc == 1223:
         logger.error("ShellExecuteW failed or cancelled with code %s", rc)
-        try:
+        with contextlib.suppress(OSError):
             state_path.unlink(missing_ok=True)
-        except OSError:
-            pass
         if rc == 1223:
             raise OSError("UAC elevation was cancelled by the user.")
         raise OSError(f"Could not relaunch elevated (ShellExecuteW returned {rc}).")

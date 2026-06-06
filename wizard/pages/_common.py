@@ -5,10 +5,11 @@ the brand vocabulary lives in one place.
 """
 from __future__ import annotations
 
+import contextlib
 import platform
 import subprocess
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, Optional
 
 import customtkinter as ctk
 
@@ -18,7 +19,6 @@ from wizard.controller import (
     BODY_MD,
     BUTTON_MD,
     CANVAS,
-    CAPTION_MD,
     DANGER,
     DISPLAY_XL,
     HAIRLINE,
@@ -27,11 +27,9 @@ from wizard.controller import (
     INK,
     INK_DEEP,
     MUTE,
-    ON_DARK,
     ON_PRIMARY,
     ROUNDED_NONE,
     ROUNDED_SM,
-    SUCCESS,
     SURFACE_CARD,
     SURFACE_DARK,
     SURFACE_SOFT,
@@ -134,7 +132,7 @@ def make_install_snippet(parent: ctk.CTkBaseClass, text: str) -> ctk.CTkFrame:
 def make_ascii_bullet(
     parent: ctk.CTkBaseClass,
     mark: str = "[+]",
-    color: Optional[str] = None,
+    color: str | None = None,
 ) -> ctk.CTkLabel:
     """`[+]` / `[-]` / `[x]` / `[?]` ASCII marker rendered as text."""
     if color is None:
@@ -204,10 +202,8 @@ def update_button_motion(
     state["hover"] = hover
     state["active"] = active
     btn.configure(hover_color=base)
-    try:
+    with contextlib.suppress(Exception):
         btn.configure(fg_color=base)
-    except Exception:
-        pass
 
 
 def make_open_folder_button(
@@ -311,15 +307,11 @@ def _open_in_explorer(target: Path | None) -> None:
     if target is None or not target.exists():
         return
     if platform.system() == "Windows":
-        try:
+        with contextlib.suppress(OSError):
             subprocess.Popen(["explorer", str(target)])
-        except OSError:
-            pass
     else:
-        try:
+        with contextlib.suppress(OSError):
             subprocess.Popen(["xdg-open", str(target)])
-        except OSError:
-            pass
 
 
 # ASCII bracket markers used in list rows ---------------------------------------

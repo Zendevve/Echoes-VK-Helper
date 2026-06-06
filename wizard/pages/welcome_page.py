@@ -29,7 +29,6 @@ from wizard.controller import (
     heading_font,
 )
 from wizard.pages._common import (
-    MARK_OK,
     MARK_PENDING,
     make_ascii_bullet,
     make_hairline,
@@ -50,7 +49,7 @@ CONFIG_RELATIVE = Path("Lord of the Rings Online") / "UserPreferences.echoes.ini
 
 
 class WelcomePage(ctk.CTkFrame):
-    def __init__(self, parent: ctk.CTkFrame, controller: "WizardController") -> None:
+    def __init__(self, parent: ctk.CTkFrame, controller: WizardController) -> None:
         super().__init__(parent, fg_color=CANVAS, corner_radius=0)
         self.controller = controller
         self._gpu_q: queue.Queue = queue.Queue()
@@ -227,7 +226,7 @@ class WelcomePage(ctk.CTkFrame):
         if 0 <= index < len(self._step_marks):
             set_status(self._step_marks[index], "[x]", SUCCESS)
 
-    def on_enter(self, state: "WizardState") -> None:
+    def on_enter(self, state: WizardState) -> None:
         state.gpu_check_done = False
         state.gpu_check_ok = False
         from wizard.anim import fade_in_labels
@@ -239,7 +238,7 @@ class WelcomePage(ctk.CTkFrame):
         return None
 
     def can_advance(self) -> bool:
-        state: "WizardState" = self.controller.context
+        state: WizardState = self.controller.context
         return state.gpu_check_done and state.gpu_check_ok
 
     def _set_gpu_checking(self) -> None:
@@ -256,7 +255,7 @@ class WelcomePage(ctk.CTkFrame):
         def worker() -> None:
             try:
                 self._gpu_q.put(("result", check_gpu()))
-            except Exception as exc:  # noqa: BLE001
+            except Exception as exc:
                 logger.exception("GPU check worker raised: %s", exc)
                 self._gpu_q.put(("error", exc))
 
@@ -280,7 +279,7 @@ class WelcomePage(ctk.CTkFrame):
 
     def _apply_gpu_result(self, result) -> None:
         from wizard.pages._common import set_status
-        state: "WizardState" = self.controller.context
+        state: WizardState = self.controller.context
         state.gpu_check_done = True
         state.gpu_check_ok = bool(result.ok)
         if result.ok:
@@ -298,7 +297,7 @@ class WelcomePage(ctk.CTkFrame):
         self.controller._refresh_next_state()
 
     def _apply_gpu_failure(self, message: str) -> None:
-        state: "WizardState" = self.controller.context
+        state: WizardState = self.controller.context
         state.gpu_check_done = True
         state.gpu_check_ok = False
         self._gpu_status.configure(text="[x]", text_color=DANGER)

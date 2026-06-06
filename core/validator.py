@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from core.config_manager import read_settings
-from core.paths import resource_path
 
 logger = logging.getLogger(__name__)
 

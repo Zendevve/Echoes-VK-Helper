@@ -16,8 +16,10 @@ Conventions:
 """
 from __future__ import annotations
 
+import contextlib
 import logging
-from typing import Any, Callable, Iterable, Optional
+from collections.abc import Callable, Iterable
+from typing import Any
 
 import customtkinter as ctk
 
@@ -29,17 +31,13 @@ _ANIM_KEY_FMT = "_evh_anim_{attr}"
 def _cancel_existing(widget: ctk.CTkBaseClass, attr: str) -> None:
     after_id = getattr(widget, _ANIM_KEY_FMT.format(attr=attr), None)
     if after_id is not None:
-        try:
+        with contextlib.suppress(Exception):
             widget.after_cancel(after_id)
-        except Exception:
-            pass
-        try:
+        with contextlib.suppress(Exception):
             delattr(widget, _ANIM_KEY_FMT.format(attr=attr))
-        except Exception:
-            pass
 
 
-def _parse_color(value: str) -> Optional[tuple[int, int, int]]:
+def _parse_color(value: str) -> tuple[int, int, int] | None:
     if (
         isinstance(value, str)
         and value.startswith("#")
@@ -90,7 +88,7 @@ def tween(
     duration_ms: int = 180,
     steps: int = 12,
     easing: str = "ease_out",
-    on_done: Optional[Callable[[], None]] = None,
+    on_done: Callable[[], None] | None = None,
 ) -> None:
     """Animate a single widget attribute over `duration_ms`."""
     if not _widget_alive(widget):
@@ -109,22 +107,18 @@ def tween(
         value = _interp(start, end, e)
         try:
             widget.configure(**{attr: value})
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             logger.debug("tween configure failed on %s.%s: %s", widget, attr, exc)
             return
         if t < 1.0:
             aid = widget.after(interval, tick)
             setattr(widget, _ANIM_KEY_FMT.format(attr=attr), aid)
         else:
-            try:
+            with contextlib.suppress(Exception):
                 delattr(widget, _ANIM_KEY_FMT.format(attr=attr))
-            except Exception:
-                pass
             if on_done is not None:
-                try:
+                with contextlib.suppress(Exception):
                     on_done()
-                except Exception:  # noqa: BLE001
-                    pass
 
     aid = widget.after(interval, tick)
     setattr(widget, _ANIM_KEY_FMT.format(attr=attr), aid)

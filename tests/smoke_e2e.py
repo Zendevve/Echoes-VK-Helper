@@ -15,12 +15,12 @@ import customtkinter as ctk
 
 ctk.set_appearance_mode("dark")
 
-from core.logger import setup_logging
-from core.paths import logs_dir
+from core.logger import setup_logging  # noqa: E402
+from core.paths import logs_dir  # noqa: E402
 
 setup_logging(logs_dir())
 
-from wizard.controller import WizardController, WizardState
+from wizard.controller import WizardController, WizardState  # noqa: E402
 
 
 def main() -> int:

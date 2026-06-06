@@ -13,7 +13,7 @@ import customtkinter as ctk
 
 ctk.set_appearance_mode("dark")
 
-from wizard.controller import WizardController
+from wizard.controller import WizardController  # noqa: E402
 
 
 def _capture_hwnd(hwnd: int, out_path: Path) -> bool:

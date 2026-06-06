@@ -11,7 +11,6 @@ from wizard.controller import (
     BODY,
     CANVAS,
     INK,
-    MUTE,
     SUCCESS,
     SURFACE_CARD,
     WizardState,
@@ -33,7 +32,7 @@ logger = logging.getLogger(__name__)
 
 
 class SummaryPage(ctk.CTkFrame):
-    def __init__(self, parent: ctk.CTkFrame, controller: "WizardController") -> None:
+    def __init__(self, parent: ctk.CTkFrame, controller: WizardController) -> None:
         super().__init__(parent, fg_color=CANVAS, corner_radius=0)
         self.controller = controller
         self._resolution_options: list[tuple[int, int]] = []

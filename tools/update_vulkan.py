@@ -46,7 +46,7 @@ class FileInfo:
         return {"name": self.name, "size": self.size, "sha256": self.sha256}
 
     @classmethod
-    def from_dict(cls, d: dict) -> "FileInfo":
+    def from_dict(cls, d: dict) -> FileInfo:
         return cls(name=d["name"], size=int(d["size"]), sha256=d["sha256"])
 
 

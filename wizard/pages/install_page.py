@@ -9,12 +9,14 @@ these two moments only.
 """
 from __future__ import annotations
 
+import contextlib
 import logging
 import queue
 import threading
 import time
 import traceback
-from typing import TYPE_CHECKING, Callable
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 import customtkinter as ctk
 
@@ -29,7 +31,6 @@ from wizard.controller import (
     MUTE,
     ON_DARK,
     ON_PRIMARY,
-    SUCCESS,
     SURFACE_DARK,
     SURFACE_DARK_ELEVATED,
     SURFACE_SOFT,
@@ -38,9 +39,6 @@ from wizard.controller import (
     heading_font,
 )
 from wizard.pages._common import (
-    MARK_FAIL,
-    MARK_OK,
-    MARK_PENDING,
     make_dark_card,
     make_hairline,
     make_primary_button,
@@ -57,12 +55,12 @@ WATCHDOG_SECONDS = 60.0
 POLL_INTERVAL_MS = 120
 
 
-class InstallAborted(Exception):
+class InstallAbortedError(Exception):
     """Raised by install steps when the user requests an abort."""
 
 
 class InstallPage(ctk.CTkFrame):
-    def __init__(self, parent: ctk.CTkFrame, controller: "WizardController") -> None:
+    def __init__(self, parent: ctk.CTkFrame, controller: WizardController) -> None:
         super().__init__(parent, fg_color=CANVAS, corner_radius=0)
         self.controller = controller
         self._q: queue.Queue = queue.Queue()
@@ -190,10 +188,8 @@ class InstallPage(ctk.CTkFrame):
 
     def on_exit(self) -> None:
         if self._watchdog_after is not None:
-            try:
+            with contextlib.suppress(Exception):
                 self.after_cancel(self._watchdog_after)
-            except Exception:
-                pass
             self._watchdog_after = None
 
     def can_advance(self) -> bool:
@@ -217,10 +213,8 @@ class InstallPage(ctk.CTkFrame):
 
     def _schedule_watchdog(self) -> None:
         if self._watchdog_after is not None:
-            try:
+            with contextlib.suppress(Exception):
                 self.after_cancel(self._watchdog_after)
-            except Exception:
-                pass
         self._watchdog_after = self.after(
             int(WATCHDOG_SECONDS * 1000), self._watchdog_tick
         )
@@ -243,7 +237,7 @@ class InstallPage(ctk.CTkFrame):
 
     def _check_abort(self) -> None:
         if self._abort_event.is_set():
-            raise InstallAborted("User aborted the installation.")
+            raise InstallAbortedError("User aborted the installation.")
 
     def _run_install(self) -> None:
         state = self.controller.context
@@ -275,11 +269,11 @@ class InstallPage(ctk.CTkFrame):
                         self._run_step_validation, state)
             self._step("[x]  done.", 100)
             self._q.put(("done",))
-        except InstallAborted as exc:
+        except InstallAbortedError as exc:
             state.aborted = True
             self._q.put(("log", f"[x] aborted: {exc}"))
             self._q.put(("aborted",))
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             tb = traceback.format_exc()
             self._q.put(("log", f"[x] error: {exc}"))
             self._q.put(("log", tb))
@@ -349,6 +343,8 @@ class InstallPage(ctk.CTkFrame):
         from core.vulkan_installer import (
             VulkanInstallError,
             install_vulkan,
+        )
+        from core.vulkan_installer import (
             rollback as vulkan_rollback,
         )
 
@@ -436,10 +432,8 @@ class InstallPage(ctk.CTkFrame):
     def _finish(self, success: bool, aborted: bool = False) -> None:
         detach_ui_queue()
         if self._watchdog_after is not None:
-            try:
+            with contextlib.suppress(Exception):
                 self.after_cancel(self._watchdog_after)
-            except Exception:
-                pass
             self._watchdog_after = None
         self.controller.context.install_succeeded = bool(success)
         if aborted:

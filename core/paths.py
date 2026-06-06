@@ -26,7 +26,7 @@ def project_root() -> Path:
 def bundle_root() -> Path:
     """Root inside a PyInstaller bundle."""
     if is_frozen():
-        return Path(getattr(sys, "_MEIPASS"))
+        return Path(sys._MEIPASS)
     return project_root()
 
 

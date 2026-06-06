@@ -12,9 +12,10 @@ welcome-page hero TUI mockup and the install-page aborted state.
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any
 
 import customtkinter as ctk
 
@@ -100,17 +101,17 @@ PAGE_LABELS: dict[str, str] = {
 
 @dataclass
 class WizardState:
-    config_path: Optional[Path] = None
-    game_path: Optional[Path] = None
-    resolution: Optional[tuple[int, int]] = None
+    config_path: Path | None = None
+    game_path: Path | None = None
+    resolution: tuple[int, int] | None = None
     detection_errors: list[str] = field(default_factory=list)
     needs_elevation: bool = False
     backup_paths: list[str] = field(default_factory=list)
-    validation: Optional[dict[str, Any]] = None
+    validation: dict[str, Any] | None = None
     install_succeeded: bool = False
     gpu_check_done: bool = False
     gpu_check_ok: bool = False
-    vulkan_install_result: Optional[dict[str, Any]] = None
+    vulkan_install_result: dict[str, Any] | None = None
     aborted: bool = False
     _resume_install: bool = False
     _elevated_attempted: bool = False
@@ -131,7 +132,7 @@ WORDMARK = "[ EVH ]"
 class WizardController(ctk.CTk):
     """Top-level application window. Owns the page stack, brand bar, and nav bar."""
 
-    def __init__(self, initial_state: Optional[WizardState] = None) -> None:
+    def __init__(self, initial_state: WizardState | None = None) -> None:
         super().__init__()
 
         self.title("Echoes Vulkan Helper")
@@ -165,7 +166,7 @@ class WizardController(ctk.CTk):
             data = load_state()
             if data:
                 apply_to_context(self.context, data)
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             logger.warning("Persisted state restore failed: %s", exc)
 
     def _show_initial_page(self) -> None:
@@ -244,11 +245,11 @@ class WizardController(ctk.CTk):
         version_lbl.grid(row=0, column=2, sticky="e", padx=(12, 20))
 
     def _build_pages(self) -> None:
-        from wizard.pages.welcome_page import WelcomePage
-        from wizard.pages.detection_page import DetectionPage
-        from wizard.pages.summary_page import SummaryPage
-        from wizard.pages.install_page import InstallPage
         from wizard.pages.completion_page import CompletionPage
+        from wizard.pages.detection_page import DetectionPage
+        from wizard.pages.install_page import InstallPage
+        from wizard.pages.summary_page import SummaryPage
+        from wizard.pages.welcome_page import WelcomePage
 
         page_classes: dict[str, type] = {
             "welcome": WelcomePage,

@@ -5,7 +5,6 @@ Exits 0 on success, 1 on failure. No external deps.
 """
 from __future__ import annotations
 
-import shutil
 import sys
 import tempfile
 from pathlib import Path
@@ -221,7 +220,7 @@ def main() -> int:
         except AssertionError as exc:
             print(f"FAIL: {t.__name__}: {exc}")
             failed += 1
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             print(f"ERROR: {t.__name__}: {exc!r}")
             failed += 1
     print(f"\n{len(tests) - failed}/{len(tests)} passed")

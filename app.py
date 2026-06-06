@@ -1,6 +1,7 @@
 """Echoes Vulkan Helper - entry point."""
 from __future__ import annotations
 
+import contextlib
 import logging
 import sys
 import traceback
@@ -21,10 +22,8 @@ def _hydrate_state_from_resume() -> dict | None:
     data = load_resume_state(resume_path)
     if not data:
         return None
-    try:
+    with contextlib.suppress(OSError):
         resume_path.unlink()
-    except OSError:
-        pass
     return data
 
 
@@ -58,10 +57,10 @@ def _check_assets_or_warn() -> bool:
 def _safe_setup_logging() -> None:
     try:
         setup_logging(logs_dir())
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         try:
             setup_logging(Path.cwd() / "logs")
-        except Exception as exc2:  # noqa: BLE001
+        except Exception as exc2:
             print(f"Logging init failed: {exc} / {exc2}", file=sys.stderr)
 
 
