@@ -26,6 +26,7 @@ from wizard.controller import (
     HAIRLINE,
     INK,
     INK_DEEP,
+    MUTE,
     ON_DARK,
     ON_PRIMARY,
     SUCCESS,
@@ -42,6 +43,7 @@ from wizard.pages._common import (
     MARK_PENDING,
     make_dark_card,
     make_hairline,
+    make_primary_button,
     make_section_label,
     make_subtitle,
 )
@@ -137,6 +139,11 @@ class InstallPage(ctk.CTkFrame):
         self.progress.set(0.0)
         self.progress.pack(fill="x", expand=True, padx=0, pady=0)
 
+        self._start_btn = make_primary_button(
+            progress_card, "Start install  >", self._on_start_clicked
+        )
+        self._start_btn.grid(row=2, column=0, sticky="ew", padx=16, pady=(0, 14))
+
         log_card = make_dark_card(body)
         log_card.grid(row=1, column=0, sticky="nsew", pady=(0, 0))
         log_card.grid_columnconfigure(0, weight=1)
@@ -171,8 +178,13 @@ class InstallPage(ctk.CTkFrame):
         fade_in_labels([self._section_lbl, self._header_subtitle])
         self._abort_event.clear()
         self.progress.set(0.0)
-        self.step_label.configure(text="[...]  preparing", text_color=INK)
+        self.step_label.configure(text="Ready to install", text_color=MUTE)
         self._clear_log()
+        self._start_btn.grid()
+
+    def _on_start_clicked(self) -> None:
+        self._start_btn.grid_forget()
+        self.step_label.configure(text="[...]  preparing", text_color=INK)
         self._schedule_watchdog()
         self._start_install()
 
