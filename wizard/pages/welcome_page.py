@@ -14,7 +14,7 @@ from typing import TYPE_CHECKING
 import customtkinter as ctk
 
 from core.backup_manager import create_backup
-from core.gpu_check import check_gpu
+from core.gpu_check import check_vulkan_support
 from wizard.controller import (
     BODY,
     CANVAS,
@@ -252,7 +252,7 @@ class WelcomePage(ctk.CTkFrame):
 
         def worker() -> None:
             try:
-                self._gpu_q.put(("result", check_gpu()))
+                self._gpu_q.put(("result", check_vulkan_support()))
             except Exception as exc:
                 logger.exception("GPU check worker raised: %s", exc)
                 self._gpu_q.put(("error", exc))
