@@ -137,18 +137,25 @@ class DetectionPage(ctk.CTkFrame):
         self._can_advance = False
         self._reset_banner()
         self.controller.context.needs_elevation = False
-        if state.config_path and state.config_path.is_file():
+
+        config_known = bool(state.config_path and state.config_path.is_file())
+        game_known = bool(state.game_path and state.game_path.is_dir())
+
+        if config_known:
             self._set_config_found(state.config_path)
         else:
             self.config_status.configure(text="Searching...", text_color=TEXT_MUTED)
             self.config_path_lbl.configure(text="Looking for UserPreferences.echoes.ini...")
 
-        if state.game_path and state.game_path.is_dir():
+        if game_known:
             from core.game_detector import is_writable as _iw
             self._set_game_found(state.game_path, writable=_iw(state.game_path))
         else:
             self.game_status.configure(text="Searching...", text_color=TEXT_MUTED)
             self.game_path_lbl.configure(text="Looking for lotroclient.exe...")
+
+        if config_known and game_known and state.resolution is not None:
+            return
 
         self._start_detection()
 

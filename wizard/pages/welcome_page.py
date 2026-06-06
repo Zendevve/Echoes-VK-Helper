@@ -40,6 +40,7 @@ class WelcomePage(ctk.CTkFrame):
         self.controller = controller
         self._gpu_q: queue.Queue = queue.Queue()
         self._gpu_worker: threading.Thread | None = None
+        self._tools_expanded = False
         self._build()
 
     def _build(self) -> None:
@@ -55,7 +56,7 @@ class WelcomePage(ctk.CTkFrame):
         body.grid_rowconfigure(2, weight=0)
         body.grid_rowconfigure(3, weight=1)
 
-        title = make_title(body, "Welcome to Echoes Vulkan Helper")
+        title = make_title(body, "Echoes Vulkan Helper")
         title.grid(row=0, column=0, sticky="ew", padx=8, pady=(0, 8))
 
         intro = make_subtitle(
@@ -72,23 +73,26 @@ class WelcomePage(ctk.CTkFrame):
         checks.grid(row=3, column=0, sticky="nsew", padx=8, pady=(0, 8))
         checks.grid_columnconfigure(0, weight=1)
 
-        lines = [
-            "Configure recommended settings",
+        self._step_labels: list[ctk.CTkLabel] = []
+        self._step_marks: list[ctk.CTkLabel] = []
+        step_texts = [
+            "Detect your configuration and game folder",
+            "Review the changes that will be made",
             "Create automatic backups of your files",
             "Install Vulkan compatibility files",
             "Verify the installation",
         ]
-        for i, text in enumerate(lines):
+        for i, text in enumerate(step_texts):
             row = ctk.CTkFrame(checks, fg_color="transparent")
             row.grid(row=i, column=0, sticky="ew", padx=20, pady=10)
             row.grid_columnconfigure(0, weight=0)
             row.grid_columnconfigure(1, weight=1)
             mark = ctk.CTkLabel(
                 row,
-                text="OK",
-                font=ctk.CTkFont(size=12, weight="bold"),
-                text_color=ACCENT,
-                width=28,
+                text="\u2022",
+                font=ctk.CTkFont(size=18),
+                text_color=TEXT_MUTED,
+                width=20,
             )
             mark.grid(row=0, column=0, padx=(0, 12))
             lbl = ctk.CTkLabel(
@@ -99,6 +103,8 @@ class WelcomePage(ctk.CTkFrame):
                 anchor="w",
             )
             lbl.grid(row=0, column=1, sticky="ew")
+            self._step_labels.append(lbl)
+            self._step_marks.append(mark)
 
         reassurance = ctk.CTkLabel(
             body,
@@ -113,29 +119,56 @@ class WelcomePage(ctk.CTkFrame):
         footer.grid_columnconfigure(0, weight=1)
         footer.grid_columnconfigure(1, weight=0)
 
-        restore_link = ctk.CTkButton(
+        self._tools_toggle = ctk.CTkButton(
             footer,
-            text="Restore from a previous backup",
+            text="Troubleshoot \u25BE",
             fg_color="transparent",
             hover_color=SURFACE_HOVER,
             text_color=TEXT_MUTED,
-            width=240,
+            width=200,
             height=32,
+            command=self._toggle_tools,
+        )
+        self._tools_toggle.grid(row=0, column=0, sticky="w", padx=8)
+
+        self._tools_panel = ctk.CTkFrame(footer, fg_color="transparent")
+        self._tools_panel.grid_columnconfigure(0, weight=1)
+        self._tools_panel.grid_columnconfigure(1, weight=1)
+
+        restore_link = ctk.CTkButton(
+            self._tools_panel,
+            text="Restore from a previous backup",
+            fg_color=SURFACE_HOVER,
+            hover_color="#4a4a4a",
+            text_color=TEXT,
+            height=36,
             command=self._on_restore_clicked,
         )
-        restore_link.grid(row=0, column=0, sticky="w", padx=8)
+        restore_link.grid(row=0, column=0, sticky="ew", padx=4, pady=4)
 
         uninstall_link = ctk.CTkButton(
-            footer,
+            self._tools_panel,
             text="Uninstall Vulkan helper",
-            fg_color="transparent",
-            hover_color=SURFACE_HOVER,
-            text_color=TEXT_MUTED,
-            width=240,
-            height=32,
+            fg_color=SURFACE_HOVER,
+            hover_color="#4a4a4a",
+            text_color=TEXT,
+            height=36,
             command=self._on_uninstall_clicked,
         )
-        uninstall_link.grid(row=0, column=1, sticky="e", padx=8)
+        uninstall_link.grid(row=0, column=1, sticky="ew", padx=4, pady=4)
+
+    def _toggle_tools(self) -> None:
+        self._tools_expanded = not self._tools_expanded
+        if self._tools_expanded:
+            self._tools_panel.grid(row=1, column=0, columnspan=2, sticky="ew", padx=8, pady=(8, 0))
+            self._tools_toggle.configure(text="Troubleshoot \u25B4")
+        else:
+            self._tools_panel.grid_forget()
+            self._tools_toggle.configure(text="Troubleshoot \u25BE")
+
+    def _mark_step_done(self, index: int) -> None:
+        if 0 <= index < len(self._step_marks):
+            self._step_marks[index].configure(text="\u2713", text_color=SUCCESS)
 
     def _build_gpu_card(
         self, parent: ctk.CTkFrame

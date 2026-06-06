@@ -8,6 +8,7 @@ from __future__ import annotations
 import logging
 import queue
 import threading
+import time
 import traceback
 from typing import TYPE_CHECKING
 
@@ -16,6 +17,7 @@ import customtkinter as ctk
 from core.logger import attach_ui_queue, detach_ui_queue
 from wizard.controller import (
     ACCENT,
+    ACCENT_HOVER,
     BG_DARK,
     DANGER,
     SUCCESS,
@@ -31,6 +33,13 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+WATCHDOG_SECONDS = 60.0
+POLL_INTERVAL_MS = 120
+
+
+class InstallAborted(Exception):
+    """Raised by install steps when the user requests an abort."""
+
 
 class InstallPage(ctk.CTkFrame):
     def __init__(self, parent: ctk.CTkFrame, controller: "WizardController") -> None:
@@ -39,6 +48,8 @@ class InstallPage(ctk.CTkFrame):
         self._q: queue.Queue = queue.Queue()
         self._worker: threading.Thread | None = None
         self._built = False
+        self._abort_event = threading.Event()
+        self._watchdog_after: str | None = None
         self._build()
 
     def _build(self) -> None:
@@ -51,10 +62,11 @@ class InstallPage(ctk.CTkFrame):
         header.grid_columnconfigure(0, weight=1)
 
         make_title(header, "Installing").grid(row=0, column=0, sticky="ew", padx=8)
-        make_subtitle(
+        self._header_subtitle = make_subtitle(
             header,
             "Please wait while the helper applies the changes. This usually takes a few seconds.",
-        ).grid(row=1, column=0, sticky="ew", padx=8, pady=(4, 0))
+        )
+        self._header_subtitle.grid(row=1, column=0, sticky="ew", padx=8, pady=(4, 0))
 
         body = ctk.CTkFrame(self, fg_color="transparent")
         body.grid(row=1, column=0, sticky="nsew")
@@ -113,16 +125,28 @@ class InstallPage(ctk.CTkFrame):
     def on_enter(self, state: WizardState) -> None:
         if not self._built:
             return
+        self._abort_event.clear()
         self.progress.set(0.0)
-        self.step_label.configure(text="Preparing...")
+        self.step_label.configure(text="Preparing...", text_color=TEXT)
         self._clear_log()
+        self._schedule_watchdog()
         self._start_install()
 
     def on_exit(self) -> None:
-        return None
+        if self._watchdog_after is not None:
+            try:
+                self.after_cancel(self._watchdog_after)
+            except Exception:
+                pass
+            self._watchdog_after = None
 
     def can_advance(self) -> bool:
         return False
+
+    def request_abort(self) -> None:
+        self._append_log("Abort requested by user. Rolling back...")
+        self._abort_event.set()
+        self.step_label.configure(text="Aborting...", text_color=DANGER)
 
     def _clear_log(self) -> None:
         self.log_box.configure(state="normal")
@@ -135,29 +159,65 @@ class InstallPage(ctk.CTkFrame):
         self.log_box.see("end")
         self.log_box.configure(state="disabled")
 
+    def _schedule_watchdog(self) -> None:
+        if self._watchdog_after is not None:
+            try:
+                self.after_cancel(self._watchdog_after)
+            except Exception:
+                pass
+        self._watchdog_after = self.after(
+            int(WATCHDOG_SECONDS * 1000), self._watchdog_tick
+        )
+
+    def _watchdog_tick(self) -> None:
+        if self._worker is not None and self._worker.is_alive():
+            self._append_log(
+                f"WARNING: install has been running for over {int(WATCHDOG_SECONDS)}s."
+            )
+            self._append_log("Click Abort to stop, or wait for it to finish.")
+            self._watchdog_after = self.after(
+                int(WATCHDOG_SECONDS * 1000), self._watchdog_tick
+            )
+
     def _start_install(self) -> None:
         attach_ui_queue(self._q)
         self._worker = threading.Thread(target=self._run_install, name="install", daemon=True)
         self._worker.start()
-        self.after(120, self._drain)
+        self.after(POLL_INTERVAL_MS, self._drain)
+
+    def _check_abort(self) -> None:
+        if self._abort_event.is_set():
+            raise InstallAborted("User aborted the installation.")
 
     def _run_install(self) -> None:
         state = self.controller.context
         state.install_succeeded = False
+        state.aborted = False
         try:
             if state.needs_elevation and state.game_path:
                 from core.elevation import relaunch_as_admin
 
-                self._q.put(("log", "Game folder is read-only. Requesting elevation..."))
+                self._q.put(("log", "Game folder is read-only. Restarting as Administrator..."))
+                state._resume_install = True
                 relaunch_as_admin(state)
                 return
 
+            self._check_abort()
             self._run_step_backup(state)
+            self._check_abort()
             self._run_step_resolution(state)
+            self._check_abort()
             self._run_step_config(state)
+            self._check_abort()
             self._run_step_vulkan(state)
+            self._check_abort()
             self._run_step_validation(state)
             self._step("Done.", 100)
+            self._q.put(("done",))
+        except InstallAborted as exc:
+            state.aborted = True
+            self._q.put(("log", f"Aborted: {exc}"))
+            self._q.put(("aborted",))
         except Exception as exc:  # noqa: BLE001
             tb = traceback.format_exc()
             self._q.put(("log", f"ERROR: {exc}"))
@@ -253,6 +313,9 @@ class InstallPage(ctk.CTkFrame):
                 elif kind == "done":
                     self._finish(success=True)
                     return
+                elif kind == "aborted":
+                    self._finish(success=False, aborted=True)
+                    return
                 elif kind == "error":
                     self._finish(success=False)
                     return
@@ -260,16 +323,26 @@ class InstallPage(ctk.CTkFrame):
             pass
 
         if self._worker and self._worker.is_alive():
-            self.after(120, self._drain)
+            self.after(POLL_INTERVAL_MS, self._drain)
         else:
             self._finish(success=self.controller.context.install_succeeded)
 
-    def _finish(self, success: bool) -> None:
+    def _finish(self, success: bool, aborted: bool = False) -> None:
         detach_ui_queue()
+        if self._watchdog_after is not None:
+            try:
+                self.after_cancel(self._watchdog_after)
+            except Exception:
+                pass
+            self._watchdog_after = None
         self.controller.context.install_succeeded = bool(success)
-        self.step_label.configure(
-            text="Complete" if success else "Completed with errors",
-            text_color=SUCCESS if success else DANGER,
-        )
-        self.progress.set(1.0)
+        if aborted:
+            self.step_label.configure(text="Aborted", text_color=DANGER)
+            self.progress.set(0.0)
+        else:
+            self.step_label.configure(
+                text="Complete" if success else "Completed with errors",
+                text_color=SUCCESS if success else DANGER,
+            )
+            self.progress.set(1.0)
         self.controller.after(600, lambda: self.controller.go_to("completion"))

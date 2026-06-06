@@ -36,6 +36,7 @@ class CompletionPage(ctk.CTkFrame):
         super().__init__(parent, fg_color=BG_DARK, corner_radius=0)
         self.controller = controller
         self._built = False
+        self._details_widgets: list[ctk.CTkBaseClass] = []
         self._build()
 
     def _build(self) -> None:
@@ -149,27 +150,42 @@ class CompletionPage(ctk.CTkFrame):
     def _populate_failure(self) -> None:
         self._title.configure(text="Installation completed with errors", text_color=DANGER)
         self._subtitle.configure(
-            text="Some checks did not pass. You can restore the original config and inspect the logs.",
+            text="Some checks did not pass. Restore the original config and inspect the logs.",
         )
 
         for w in self.body.winfo_children():
             w.destroy()
 
         state = self.controller.context
-        validation = state.validation or {}
-        checks = [
-            ("Configuration file present", bool(validation.get("config_found"))),
-            ("Config backup present", bool(validation.get("backup_found"))),
-            ("Game installation present", bool(validation.get("game_found"))),
-            ("Recommended settings applied", bool(validation.get("settings_applied"))),
-            ("Vulkan files installed", bool(validation.get("vulkan_installed"))),
-            ("Fullscreen = True", bool(validation.get("fullscreen_set"))),
-            ("ConfineFullScreenMouseCursor = False", bool(validation.get("cursor_unconfined"))),
-            ("Resolution set", bool(validation.get("resolution_set"))),
-            ("All DLL files present", bool(validation.get("dll_files_present"))),
-        ]
-        for i, (label, ok) in enumerate(checks):
-            self._status_row(self.body, label, ok, row=i)
+        if state.aborted:
+            self._render_aborted()
+            return
+
+        groups = self._build_failure_groups(state.validation or {})
+        for i, (name, passed, total) in enumerate(groups):
+            self._group_summary_row(self.body, name, passed, total, row=i)
+
+        details_btn_row = 10
+        details_frame = ctk.CTkFrame(self.body, fg_color="transparent")
+        details_frame.grid(
+            row=details_btn_row, column=0, sticky="ew", padx=8, pady=(8, 0)
+        )
+        details_frame.grid_columnconfigure(0, weight=1)
+
+        self._details_visible = False
+        toggle_btn = ctk.CTkButton(
+            details_frame,
+            text="Show details \u25BE",
+            fg_color="transparent",
+            hover_color=SURFACE_HOVER,
+            text_color=TEXT_MUTED,
+            height=32,
+            command=lambda: self._toggle_failure_details(groups, details_btn_row + 1),
+        )
+        toggle_btn.grid(row=0, column=0, sticky="w")
+        self._failure_details_toggle = toggle_btn
+        self._failure_details_groups = groups
+        self._failure_details_parent = details_frame
 
         actions = ctk.CTkFrame(self.body, fg_color="transparent")
         actions.grid(row=20, column=0, sticky="ew", padx=8, pady=(12, 8))
@@ -186,7 +202,7 @@ class CompletionPage(ctk.CTkFrame):
             font=ctk.CTkFont(size=14, weight="bold"),
             command=self._restore_backup,
         ).grid(row=0, column=0, padx=4, pady=4, sticky="ew")
-        logs_btn = ctk.CTkButton(
+        ctk.CTkButton(
             actions,
             text="Open Logs",
             height=44,
@@ -194,8 +210,7 @@ class CompletionPage(ctk.CTkFrame):
             hover_color="#4a4a4a",
             text_color=TEXT,
             command=self._open_logs,
-        )
-        logs_btn.grid(row=0, column=1, padx=4, pady=4, sticky="ew")
+        ).grid(row=0, column=1, padx=4, pady=4, sticky="ew")
         make_open_folder_button(actions, "Open Game Folder", self._game_folder).grid(
             row=0, column=2, padx=4, pady=4, sticky="ew"
         )
@@ -217,6 +232,140 @@ class CompletionPage(ctk.CTkFrame):
             text_color=TEXT_MUTED,
             command=self._uninstall_vulkan,
         ).grid(row=0, column=0, padx=4, pady=4, sticky="ew")
+
+    def _build_failure_groups(self, validation: dict) -> list[tuple[str, int, int]]:
+        checks = [
+            ("Setup", [
+                ("Configuration file present", bool(validation.get("config_found"))),
+                ("Config backup present", bool(validation.get("backup_found"))),
+                ("Game installation present", bool(validation.get("game_found"))),
+            ]),
+            ("Settings", [
+                ("Recommended settings applied", bool(validation.get("settings_applied"))),
+                ("Fullscreen = True", bool(validation.get("fullscreen_set"))),
+                ("ConfineFullScreenMouseCursor = False", bool(validation.get("cursor_unconfined"))),
+                ("Resolution set", bool(validation.get("resolution_set"))),
+            ]),
+            ("Vulkan files", [
+                ("Vulkan files installed", bool(validation.get("vulkan_installed"))),
+                ("All DLL files present", bool(validation.get("dll_files_present"))),
+            ]),
+        ]
+        out: list[tuple[str, int, int]] = []
+        for name, items in checks:
+            total = len(items)
+            passed = sum(1 for _, ok in items if ok)
+            out.append((name, passed, total))
+        return out
+
+    def _group_summary_row(
+        self,
+        parent: ctk.CTkFrame,
+        group: str,
+        passed: int,
+        total: int,
+        row: int,
+    ) -> None:
+        card = make_card(parent)
+        card.grid(row=row, column=0, sticky="ew", padx=8, pady=4)
+        card.grid_columnconfigure(1, weight=1)
+
+        ok = passed == total
+        mark = ctk.CTkLabel(
+            card,
+            text="OK" if ok else "X",
+            width=28,
+            font=ctk.CTkFont(size=12, weight="bold"),
+            text_color=SUCCESS if ok else DANGER,
+        )
+        mark.grid(row=0, column=0, padx=(16, 8), pady=12)
+        lbl = ctk.CTkLabel(
+            card,
+            text=group,
+            font=ctk.CTkFont(size=14, weight="bold"),
+            text_color=TEXT,
+            anchor="w",
+        )
+        lbl.grid(row=0, column=1, sticky="ew", padx=8, pady=12)
+        count = ctk.CTkLabel(
+            card,
+            text=f"{passed}/{total}",
+            font=ctk.CTkFont(size=14),
+            text_color=SUCCESS if ok else DANGER,
+            anchor="e",
+        )
+        count.grid(row=0, column=2, padx=(8, 16), pady=12)
+
+    def _toggle_failure_details(
+        self, groups: list[tuple[str, int, int]], start_row: int
+    ) -> None:
+        self._details_visible = not self._details_visible
+        toggle = self._failure_details_toggle
+        for w in self._details_widgets:
+            w.destroy()
+        self._details_widgets = []
+        if not self._details_visible:
+            toggle.configure(text="Show details \u25BE")
+            return
+        toggle.configure(text="Hide details \u25B4")
+        validation = self.controller.context.validation or {}
+        flat = self._flatten_failure_checks(validation)
+        for i, (label, ok) in enumerate(flat):
+            self._status_row(self._failure_details_parent, label, ok, row=start_row + i)
+            self._details_widgets.append(self._failure_details_parent.winfo_children()[-1])
+
+    def _flatten_failure_checks(self, validation: dict) -> list[tuple[str, bool]]:
+        return [
+            ("Configuration file present", bool(validation.get("config_found"))),
+            ("Config backup present", bool(validation.get("backup_found"))),
+            ("Game installation present", bool(validation.get("game_found"))),
+            ("Recommended settings applied", bool(validation.get("settings_applied"))),
+            ("Fullscreen = True", bool(validation.get("fullscreen_set"))),
+            ("ConfineFullScreenMouseCursor = False", bool(validation.get("cursor_unconfined"))),
+            ("Resolution set", bool(validation.get("resolution_set"))),
+            ("Vulkan files installed", bool(validation.get("vulkan_installed"))),
+            ("All DLL files present", bool(validation.get("dll_files_present"))),
+        ]
+
+    def _render_aborted(self) -> None:
+        info = ctk.CTkLabel(
+            self.body,
+            text=(
+                "The install was cancelled before it finished. Your files may be in a partial "
+                "state. You can restore from a backup below."
+            ),
+            font=ctk.CTkFont(size=13),
+            text_color=TEXT_MUTED,
+            anchor="w",
+            justify="left",
+            wraplength=680,
+        )
+        info.grid(row=0, column=0, sticky="ew", padx=16, pady=12)
+
+        actions = ctk.CTkFrame(self.body, fg_color="transparent")
+        actions.grid(row=1, column=0, sticky="ew", padx=8, pady=(12, 8))
+        for c in range(2):
+            actions.grid_columnconfigure(c, weight=1)
+
+        ctk.CTkButton(
+            actions,
+            text="Restore Backup",
+            height=44,
+            fg_color=ACCENT,
+            hover_color="#9d4ee8",
+            text_color=TEXT,
+            font=ctk.CTkFont(size=14, weight="bold"),
+            command=self._restore_backup,
+        ).grid(row=0, column=0, padx=4, pady=4, sticky="ew")
+        ctk.CTkButton(
+            actions,
+            text="Open Logs",
+            height=44,
+            fg_color=SURFACE_HOVER,
+            hover_color="#4a4a4a",
+            text_color=TEXT,
+            command=self._open_logs,
+        ).grid(row=0, column=1, padx=4, pady=4, sticky="ew")
 
     def _render_actions(
         self,
@@ -315,6 +464,8 @@ class CompletionPage(ctk.CTkFrame):
     def _restore_backup(self) -> None:
         state = self.controller.context
         if not state.config_path:
+            self._append_status("Cannot restore: no config file is known.")
+            logger.warning("Restore requested but state.config_path is None.")
             return
         from core.backup_manager import restore_backup
 

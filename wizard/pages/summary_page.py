@@ -117,10 +117,27 @@ class SummaryPage(ctk.CTkFrame):
 
     def _populate_config_rows(self) -> None:
         state = self.controller.context
-        res_str = f"{state.resolution[0]}x{state.resolution[1]}" if state.resolution else "auto"
         self._row(self.config_card, "Fullscreen", "True")
         self._row(self.config_card, "ConfineFullScreenMouseCursor", "False")
-        self._row(self.config_card, "Resolution", res_str)
+        self._res_value_lbl = self._add_value_row(self.config_card, "Resolution")
+
+    def _add_value_row(self, parent: ctk.CTkFrame, text: str) -> ctk.CTkLabel:
+        row = self._build_check_row(parent, text)
+        row.grid_columnconfigure(2, weight=0)
+        state = self.controller.context
+        if text == "Resolution" and state.resolution:
+            val = f"{state.resolution[0]}x{state.resolution[1]}"
+        else:
+            val = ""
+        lbl = ctk.CTkLabel(
+            row,
+            text=val,
+            font=ctk.CTkFont(size=14, weight="bold"),
+            text_color=TEXT,
+            anchor="e",
+        )
+        lbl.grid(row=0, column=2, sticky="e", padx=(8, 0))
+        return lbl
 
     def _populate_files_rows(self) -> None:
         for name in ("dinput8.ini", "dinput8.dll", "d3d9.dll"):
@@ -131,17 +148,17 @@ class SummaryPage(ctk.CTkFrame):
         self._row(self.backup_card, "Existing DLL/INI backups (rotated, .backup chain)", "as needed")
 
     def _populate_monitor_row(self) -> None:
-        from core.resolution import list_detected_modes
+        from core.resolution import curated_modes, get_native_resolution
 
-        modes = list_detected_modes()
-        if not modes:
-            modes = [(1920, 1080)]
+        state = self.controller.context
+        native = state.resolution or get_native_resolution()
+        modes = curated_modes(native=native)
         self._resolution_options = modes
 
         row = self._build_check_row(self.monitor_card, "Primary monitor resolution")
         row.grid_columnconfigure(2, weight=0)
 
-        current = self.controller.context.resolution or modes[0]
+        current = state.resolution or modes[0]
         initial = f"{current[0]}x{current[1]}"
         self._res_var = ctk.StringVar(value=initial)
         self._res_menu = ctk.CTkOptionMenu(
@@ -163,6 +180,9 @@ class SummaryPage(ctk.CTkFrame):
             self.controller.context.resolution = (int(w_str), int(h_str))
         except (ValueError, AttributeError):
             logger.warning("Bad resolution value: %s", value)
+            return
+        if getattr(self, "_res_value_lbl", None) is not None:
+            self._res_value_lbl.configure(text=value)
 
     def on_enter(self, state: WizardState) -> None:
         from core.resolution import get_native_resolution

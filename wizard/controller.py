@@ -16,6 +16,7 @@ import customtkinter as ctk
 logger = logging.getLogger(__name__)
 
 ACCENT = "#8A2BE2"
+ACCENT_HOVER = "#9d4ee8"
 BG_DARK = "#1a1a1a"
 SURFACE = "#2a2a2a"
 SURFACE_HOVER = "#3a3a3a"
@@ -23,6 +24,7 @@ TEXT = "#ffffff"
 TEXT_MUTED = "#a0a0a0"
 SUCCESS = "#22c55e"
 DANGER = "#ef4444"
+DANGER_HOVER = "#dc2626"
 
 PAGE_NAMES: tuple[str, ...] = (
     "welcome",
@@ -31,6 +33,14 @@ PAGE_NAMES: tuple[str, ...] = (
     "install",
     "completion",
 )
+
+PAGE_LABELS: dict[str, str] = {
+    "welcome": "Welcome",
+    "detection": "Detection",
+    "summary": "Review",
+    "install": "Install",
+    "completion": "Done",
+}
 
 
 @dataclass
@@ -45,6 +55,10 @@ class WizardState:
     install_succeeded: bool = False
     gpu_check_done: bool = False
     gpu_check_ok: bool = False
+    vulkan_install_result: Optional[dict[str, Any]] = None
+    aborted: bool = False
+    _resume_install: bool = False
+    _elevated_attempted: bool = False
 
 
 class WizardController(ctk.CTk):
@@ -69,7 +83,14 @@ class WizardController(ctk.CTk):
         self._build_layout()
         self._build_pages()
         self._build_nav_bar()
-        self._show_page(0)
+        self._show_initial_page()
+
+    def _show_initial_page(self) -> None:
+        if getattr(self.context, "_resume_install", False):
+            self._show_page(PAGE_NAMES.index("install"))
+            self.context._resume_install = False
+        else:
+            self._show_page(0)
 
     def _build_layout(self) -> None:
         self.grid_columnconfigure(0, weight=1)
@@ -125,7 +146,6 @@ class WizardController(ctk.CTk):
             text_color=TEXT,
             command=self._on_back,
         )
-        self._back_btn.grid(row=0, column=0, padx=(20, 8), pady=14)
 
         self._step_label = ctk.CTkLabel(
             self._nav_bar,
@@ -145,9 +165,8 @@ class WizardController(ctk.CTk):
             text_color=TEXT_MUTED,
             border_width=1,
             border_color=SURFACE_HOVER,
-            command=self._on_cancel,
+            command=self._on_nav_action,
         )
-        self._cancel_btn.grid(row=0, column=2, padx=8, pady=14)
 
         self._next_btn = ctk.CTkButton(
             self._nav_bar,
@@ -155,12 +174,11 @@ class WizardController(ctk.CTk):
             width=160,
             height=44,
             fg_color=ACCENT,
-            hover_color="#9d4ee8",
+            hover_color=ACCENT_HOVER,
             text_color=TEXT,
             font=ctk.CTkFont(size=14, weight="bold"),
             command=self._on_next,
         )
-        self._next_btn.grid(row=0, column=3, padx=(8, 20), pady=14)
 
     def _show_page(self, index: int) -> None:
         if index < 0 or index >= len(PAGE_NAMES):
@@ -172,18 +190,45 @@ class WizardController(ctk.CTk):
         page.on_enter(self.context)
 
         total = len(PAGE_NAMES)
-        self._step_label.configure(text=f"Step {index + 1} of {total}  -  {name.title()}")
+        label = PAGE_LABELS.get(name, name.title())
+        self._step_label.configure(text=f"Step {index + 1} of {total}  -  {label}")
 
         is_install = name == "install"
-        self._back_btn.configure(state="disabled" if (index == 0 or is_install) else "normal")
-        self._cancel_btn.configure(state="disabled" if is_install else "normal")
+
+        if index == 0 or is_install:
+            self._back_btn.grid_remove()
+        else:
+            self._back_btn.grid(row=0, column=0, padx=(20, 8), pady=14)
+            self._back_btn.configure(state="normal")
+
+        if is_install:
+            self._cancel_btn.configure(
+                text="Abort",
+                fg_color=DANGER,
+                hover_color=DANGER_HOVER,
+                text_color=TEXT,
+                border_width=0,
+                state="normal",
+            )
+        else:
+            self._cancel_btn.configure(
+                text="Cancel",
+                fg_color="transparent",
+                hover_color=SURFACE_HOVER,
+                text_color=TEXT_MUTED,
+                border_width=1,
+                border_color=SURFACE_HOVER,
+                state="normal",
+            )
+        self._cancel_btn.grid(row=0, column=2, padx=8, pady=14)
+
         self._next_btn.configure(state="disabled" if is_install else "normal")
+        self._next_btn.grid(row=0, column=3, padx=(8, 20), pady=14)
 
         if name == "summary":
             self._next_btn.configure(text="Install", state="normal")
         elif name == "completion":
             self._next_btn.configure(text="Finish", state="normal")
-            self._back_btn.configure(state="disabled")
         else:
             self._next_btn.configure(text="Next")
 
@@ -225,10 +270,37 @@ class WizardController(ctk.CTk):
 
         self._show_page(self._current_index + 1)
 
+    def _on_nav_action(self) -> None:
+        name = PAGE_NAMES[self._current_index]
+        if name == "install":
+            self._on_abort()
+        else:
+            self._on_cancel()
+
     def _on_cancel(self) -> None:
-        if PAGE_NAMES[self._current_index] == "install":
+        from tkinter import messagebox
+
+        if not messagebox.askyesno(
+            "Quit helper",
+            "Quit the helper? Any progress will be lost.",
+            parent=self,
+        ):
             return
         self.quit()
+
+    def _on_abort(self) -> None:
+        from tkinter import messagebox
+
+        if not messagebox.askyesno(
+            "Abort install",
+            "Abort the installation? Files may be left in a partial state. "
+            "You can restore from a backup on the next screen.",
+            parent=self,
+        ):
+            return
+        page = self._pages.get("install")
+        if page is not None and hasattr(page, "request_abort"):
+            page.request_abort()
 
     def go_next(self) -> None:
         """Public hook for pages that want to advance programmatically."""
