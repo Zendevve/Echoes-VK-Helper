@@ -17,7 +17,7 @@ import threading
 import time
 import traceback
 from collections.abc import Callable
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import customtkinter as ctk
 
@@ -279,15 +279,16 @@ class InstallPage(ctk.CTkFrame):
                 state,
             )
             self._check_abort()
-            self._paced(
+            validation_result = self._paced(
                 "running validation",
                 "[...]  running validation",
                 90,
                 self._run_step_validation,
                 state,
             )
+            self._check_abort()
             self._step("[x]  done.", 100)
-            self._q.put(("done",))
+            self._q.put(("done", validation_result))
         except InstallAbortedError as exc:
             state.aborted = True
             self._q.put(("log", f"[x] aborted: {exc}"))
@@ -303,25 +304,29 @@ class InstallPage(ctk.CTkFrame):
         name: str,
         label: str,
         pct: float,
-        step_fn: Callable[[WizardState], None],
+        step_fn: Callable[[WizardState], Any],
         state: WizardState,
-    ) -> None:
+    ) -> Any:
         """Run one install step with visible pacing.
 
         The step's own sub-bullets (e.g. ``    - rotating foo.ini``) are pushed
         by the step function via ``_q.put(("log", ...))``. This wrapper logs
         the start and end of the step, drives the progress bar, and sleeps
         briefly so the UI can render the transition between steps.
+
+        Returns whatever `step_fn` returns, so callers can capture
+        ValidationResult or other artifacts emitted by the step.
         """
         self._step(label, pct)
         self._q.put(("log", f"[...]  step: {name}"))
         start = time.perf_counter()
         try:
-            step_fn(state)
+            step_result = step_fn(state)
         finally:
             elapsed = time.perf_counter() - start
             self._q.put(("log", f"[+]  step: {name} ({elapsed:.2f}s)"))
             time.sleep(0.3)
+        return step_result
 
     def _run_step_backup(self, state: WizardState) -> None:
         if not state.config_path:
@@ -386,7 +391,7 @@ class InstallPage(ctk.CTkFrame):
             self._q.put(("log", f"    - installed {dst.name}"))
         state.vulkan_install_result = result.__dict__
 
-    def _run_step_validation(self, state: WizardState) -> None:
+    def _run_step_validation(self, state: WizardState) -> Any:
         from core.validator import run_validation
 
         backup_path = None
@@ -420,6 +425,8 @@ class InstallPage(ctk.CTkFrame):
         if not result.all_passed:
             self._q.put(("log", "[!] validation reported failures. marking install as failed."))
 
+        return result
+
     def _step(self, label: str, pct: float) -> None:
         self._q.put(("step", label, pct))
 
@@ -435,7 +442,8 @@ class InstallPage(ctk.CTkFrame):
                     self.step_label.configure(text=label)
                     self.progress.set(pct / 100.0)
                 elif kind == "done":
-                    self._finish(success=True)
+                    validation_result = evt[1]
+                    self._finish(success=bool(validation_result.all_passed))
                     return
                 elif kind == "aborted":
                     self._finish(success=False, aborted=True)
@@ -449,7 +457,10 @@ class InstallPage(ctk.CTkFrame):
         if self._worker and self._worker.is_alive():
             self.after(POLL_INTERVAL_MS, self._drain)
         else:
-            self._finish(success=self.controller.context.install_succeeded)
+            # Worker ended without emitting a terminal event. The install
+            # flag was reset to False at _run_install start, so this
+            # correctly reports failure for silent crashes.
+            self._finish(success=False)
 
     def _finish(self, success: bool, aborted: bool = False) -> None:
         detach_ui_queue()
