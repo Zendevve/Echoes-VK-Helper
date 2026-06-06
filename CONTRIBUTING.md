@@ -1,53 +1,65 @@
 <!-- generated-by: gsd-doc-writer -->
 # Contributing
 
-The Echoes Vulkan Helper is **distributed as a prebuilt binary**. Source
-contributions are not accepted and pull requests will be closed without
-merge.
+Thanks for your interest in improving the Echoes Vulkan Helper. The source
+is publicly readable under a source-available license (see
+[LICENSE](./LICENSE)) and **pull requests are welcome**.
 
-If you would like to:
+## Bug reports
 
-- **Report a bug or request a feature** in the official binary, email
-  [zendevve@duck.com](mailto:zendevve@duck.com) or open a ticket through the
-  purchase channel. Include the build hash shown in the wizard's *About*
-  panel and the contents of the latest `logs\install.log`.
-- **Bundle the binary with your own commercial product**, sign a separate
-  redistribution agreement first — see [COMMERCIAL.md](./COMMERCIAL.md).
-  Unsigned repackaging is not permitted.
-- **Run a modified build internally** (e.g. for your own staff machines),
-  the source is available under AGPL-3.0 and you may build it for
-  internal use, but you may **not** distribute that build to anyone
-  outside your organisation. See [LICENSE](./LICENSE) and
-  [COMMERCIAL.md](./COMMERCIAL.md) for the boundary.
-- **Audit or review the source** for security, you may clone the
-  repository. The maintainer is happy to coordinate responsible
-  disclosure at [zendevve@duck.com](mailto:zendevve@duck.com).
-
-## Issue reporting
-
-There are no issue templates. When reporting a bug, include:
+When opening an issue, please include:
 
 - **What you did** and **what you expected to happen** vs. **what happened**.
 - The contents of the relevant log file under `logs\` (the wizard writes a
   rotating log there at runtime).
-- Your Windows version (10 vs. 11, build number).
+- Your Windows version (10 vs. 11, build number), and whether you are
+  running the EXE from the official release or `python app.py` from a local
+  checkout.
 - For game-detection problems: the path to your `Echoes of Angmar` install
   folder and whether `UserPreferences.echoes.ini` exists there.
-- The build hash shown on the *About* page of the wizard.
+- For installer/build problems: the full `pyinstaller` command output and
+  the contents of `build/` if present.
 
-For security or license-related reports, email
-[zendevve@duck.com](mailto:zendevve@duck.com) directly rather than opening a
-public issue.
+## Pull request guidelines
 
-## License of the source
+There is no `PULL_REQUEST_TEMPLATE.md` in this repository, so the
+following conventions apply:
 
-The source in this repository is licensed under **AGPL-3.0** (see
-[LICENSE](./LICENSE)). Anything you build from it is also AGPL — so if
-you want to keep modifications closed or distribute a build outside your
-organisation, you need a commercial licence; see
-[COMMERCIAL.md](./COMMERCIAL.md). Bundled third-party components keep
-their own licences:
+- **Branch from `main`.** Feature branches do not need a strict naming
+  scheme, but a prefix such as `feat/`, `fix/`, or `chore/` is appreciated.
+- **One logical change per PR.** Split refactors from behavior changes
+  from asset/DXVK-version bumps.
+- **Keep `assets/vulkan/` out of feature PRs unless the change is
+  specifically about updating DXVK.** DXVK is MIT-licensed upstream and is
+  a separate dependency; bumping it is its own concern (see
+  `tools/update_vulkan.py`).
+- **Tests are required for behavior changes** in `core/`, `wizard/`, and
+  `tools/`. GUI-tagged tests (`@pytest.mark.gui`) are skipped on headless CI
+  via `PYTEST_DISABLE_GUI=1`; non-GUI tests must pass on all three Python
+  versions (3.10, 3.11, 3.12).
+- **CI must be green.** The `lint`, `test`, and `build-smoke` jobs all run
+  on every PR. Do not disable or skip them.
+- **Commit messages:** short, imperative, sentence case is fine (e.g.
+  `Add backup rotation to uninstaller`). The project does not enforce
+  Conventional Commits.
+
+For the full local setup, test commands, and CI matrix, see
+[docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md).
+
+## Contributor license
+
+By submitting a pull request, you agree that your contribution is licensed
+under the project's source-available license (see [LICENSE](./LICENSE)).
+If you are contributing on behalf of an employer, make sure you have
+authority to do so. Bundled third-party components keep their own licenses:
 
 - DXVK (`assets/vulkan/d3d9.dll`, `dinput8.dll`) — MIT, upstream at
   <https://github.com/doitsujin/dxvk>.
 - PyInstaller runtime — GPL-2.0 with a bootloader exception.
+
+## License of the source
+
+The source in this repository is released under a source-available license.
+See [LICENSE](./LICENSE) for the full text and
+[COMMERCIAL.md](./COMMERCIAL.md) if you want a separate commercial licence
+that lets you keep modifications closed.
