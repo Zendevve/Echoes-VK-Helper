@@ -23,6 +23,7 @@ from wizard.controller import (
     MUTE,
     ON_DARK,
     SUCCESS,
+    SURFACE_DARK,
     SURFACE_SOFT,
     font,
     heading_font,
