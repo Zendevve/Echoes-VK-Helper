@@ -72,3 +72,14 @@ echoes-vulkan-helper/
 │   └── d3d9.dll      <- drop DXVK build here
 └── logs/
 ```
+
+## License
+
+AGPL-3.0 — see [LICENSE](./LICENSE).
+
+## Commercial use
+
+AGPL requires that any modified version you run as a network service be published
+under AGPL. If you want to keep your changes closed, ship a hosted variant, or
+bundle this with a commercial product, a [commercial license](./COMMERCIAL.md)
+is available. Solo-dev and hobbyist relicensing is treated generously.
