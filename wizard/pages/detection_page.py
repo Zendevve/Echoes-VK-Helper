@@ -33,6 +33,7 @@ from wizard.pages._common import (
     make_secondary_button,
     make_section_label,
     make_subtitle,
+    set_status,
 )
 
 if TYPE_CHECKING:
@@ -68,17 +69,16 @@ class DetectionPage(ctk.CTkFrame):
         header.grid(row=0, column=0, sticky="ew", padx=24, pady=(24, 8))
         header.grid_columnconfigure(0, weight=1)
 
-        make_section_label(header, "[?]  Locate your installation").grid(
-            row=0, column=0, sticky="ew"
-        )
+        self._section_lbl = make_section_label(header, "[?]  Locate your installation")
+        self._section_lbl.grid(row=0, column=0, sticky="ew")
         make_hairline(header).grid(row=1, column=0, sticky="ew", pady=(8, 0))
 
-        sub = make_subtitle(
+        self._subtitle_lbl = make_subtitle(
             header,
             "Searching for your Echoes configuration file and game installation. "
             "This usually takes a few seconds.",
         )
-        sub.grid(row=2, column=0, sticky="ew", pady=(8, 0))
+        self._subtitle_lbl.grid(row=2, column=0, sticky="ew", pady=(8, 0))
 
     def _build_body(self, parent: ctk.CTkFrame) -> None:
         body = ctk.CTkFrame(parent, fg_color=CANVAS, corner_radius=0)
@@ -176,20 +176,24 @@ class DetectionPage(ctk.CTkFrame):
         self._reset_banner()
         self.controller.context.needs_elevation = False
 
+        from wizard.anim import fade_in_labels, slide_banner_in
+        fade_in_labels([self._section_lbl, self._subtitle_lbl])
+        slide_banner_in(self.banner)
+
         config_known = bool(state.config_path and state.config_path.is_file())
         game_known = bool(state.game_path and state.game_path.is_dir())
 
         if config_known:
             self._set_config_found(state.config_path)
         else:
-            self.config_status.configure(text=MARK_PENDING, text_color=MUTE)
+            set_status(self.config_status, MARK_PENDING, MUTE)
             self.config_path_lbl.configure(text="Looking for UserPreferences.echoes.ini...")
 
         if game_known:
             from core.game_detector import is_writable as _iw
             self._set_game_found(state.game_path, writable=_iw(state.game_path))
         else:
-            self.game_status.configure(text=MARK_PENDING, text_color=MUTE)
+            set_status(self.game_status, MARK_PENDING, MUTE)
             self.game_path_lbl.configure(text="Looking for lotroclient.exe...")
 
         if config_known and game_known and state.resolution is not None:
@@ -262,7 +266,7 @@ class DetectionPage(ctk.CTkFrame):
 
     def _set_config_found(self, path: Path) -> None:
         self.controller.context.config_path = path
-        self.config_status.configure(text=MARK_OK, text_color=SUCCESS)
+        set_status(self.config_status, MARK_OK, SUCCESS)
         self.config_path_lbl.configure(text=str(path))
         self.config_browse_btn.configure(state="normal", command=self._browse_config)
         self._persist()
@@ -270,14 +274,14 @@ class DetectionPage(ctk.CTkFrame):
 
     def _set_config_missing(self) -> None:
         self.controller.context.config_path = None
-        self.config_status.configure(text=MARK_FAIL, text_color=DANGER)
+        set_status(self.config_status, MARK_FAIL, DANGER)
         self.config_path_lbl.configure(text="UserPreferences.echoes.ini was not found.")
         self.config_browse_btn.configure(state="normal", command=self._browse_config)
         self._evaluate_advance()
 
     def _set_game_found(self, path: Path, writable: bool | None) -> None:
         self.controller.context.game_path = path
-        self.game_status.configure(text=MARK_OK, text_color=SUCCESS)
+        set_status(self.game_status, MARK_OK, SUCCESS)
         self.game_path_lbl.configure(text=str(path / "lotroclient.exe"))
         self.game_browse_btn.configure(state="normal", command=self._browse_game)
         if writable is not None:
@@ -287,7 +291,7 @@ class DetectionPage(ctk.CTkFrame):
 
     def _set_game_missing(self) -> None:
         self.controller.context.game_path = None
-        self.game_status.configure(text=MARK_FAIL, text_color=DANGER)
+        set_status(self.game_status, MARK_FAIL, DANGER)
         self.game_path_lbl.configure(text="lotroclient.exe was not found.")
         self.game_browse_btn.configure(state="normal", command=self._browse_game)
         self._evaluate_advance()
@@ -295,6 +299,7 @@ class DetectionPage(ctk.CTkFrame):
     def _set_writability(self, writable: bool) -> None:
         ctx = self.controller.context
         ctx.needs_elevation = not writable
+        from wizard.anim import slide_banner_in
         if writable:
             self.banner.configure(
                 text="[+]  game folder is writable, no elevation needed",
@@ -305,6 +310,7 @@ class DetectionPage(ctk.CTkFrame):
                 text="[!]  game folder is read-only. the helper will restart as administrator before installing.",
                 text_color="#cc7f08",
             )
+        slide_banner_in(self.banner)
 
     def _evaluate_advance(self) -> None:
         s = self.controller.context

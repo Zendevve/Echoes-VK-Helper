@@ -322,6 +322,8 @@ class CompletionPage(ctk.CTkFrame):
         )
 
     def on_enter(self, state: WizardState) -> None:
+        from wizard.anim import fade_in_labels
+        fade_in_labels([self._title_lbl, self._subtitle_lbl])
         if state.install_succeeded:
             self._populate_success()
         else:

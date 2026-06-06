@@ -52,14 +52,14 @@ class SummaryPage(ctk.CTkFrame):
         header.grid(row=0, column=0, sticky="ew", padx=24, pady=(24, 8))
         header.grid_columnconfigure(0, weight=1)
 
-        make_section_label(header, "[+]  Review changes").grid(
-            row=0, column=0, sticky="ew"
-        )
+        self._section_lbl = make_section_label(header, "[+]  Review changes")
+        self._section_lbl.grid(row=0, column=0, sticky="ew")
         make_hairline(header).grid(row=1, column=0, sticky="ew", pady=(8, 0))
-        make_subtitle(
+        self._subtitle_lbl = make_subtitle(
             header,
             "The following changes will be applied. Click Install to continue.",
-        ).grid(row=2, column=0, sticky="ew", pady=(8, 0))
+        )
+        self._subtitle_lbl.grid(row=2, column=0, sticky="ew", pady=(8, 0))
 
     def _build_body(self, parent: ctk.CTkFrame) -> None:
         body = ctk.CTkScrollableFrame(parent, fg_color=CANVAS, corner_radius=0)
@@ -207,6 +207,9 @@ class SummaryPage(ctk.CTkFrame):
 
     def on_enter(self, state: WizardState) -> None:
         from core.resolution import get_native_resolution
+        from wizard.anim import fade_in_labels
+
+        fade_in_labels([self._section_lbl, self._subtitle_lbl])
 
         if state.resolution is None:
             state.resolution = get_native_resolution()

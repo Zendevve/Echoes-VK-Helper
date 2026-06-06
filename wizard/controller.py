@@ -267,13 +267,15 @@ class WizardController(ctk.CTk):
         for w in self._nav_bar.winfo_children():
             w.destroy()
 
+        from wizard.pages._common import _wire_button_motion
+
         self._back_btn = ctk.CTkButton(
             self._nav_bar,
             text="Back",
             width=120,
             height=36,
             fg_color=CANVAS,
-            hover_color=SURFACE_SOFT,
+            hover_color=CANVAS,
             text_color=INK,
             font=font(size=BUTTON_MD, weight="normal"),
             border_width=1,
@@ -281,6 +283,8 @@ class WizardController(ctk.CTk):
             corner_radius=ROUNDED_SM,
             command=self._on_back,
         )
+        _wire_button_motion(self._back_btn, base=CANVAS,
+                            hover=SURFACE_SOFT, active=SURFACE_CARD)
 
         self._step_label = ctk.CTkLabel(
             self._nav_bar,
@@ -296,7 +300,7 @@ class WizardController(ctk.CTk):
             width=120,
             height=36,
             fg_color=CANVAS,
-            hover_color=SURFACE_SOFT,
+            hover_color=CANVAS,
             text_color=MUTE,
             border_width=1,
             border_color=HAIRLINE_STRONG,
@@ -304,6 +308,8 @@ class WizardController(ctk.CTk):
             font=font(size=BUTTON_MD, weight="normal"),
             command=self._on_nav_action,
         )
+        _wire_button_motion(self._cancel_btn, base=CANVAS,
+                            hover=SURFACE_SOFT, active=SURFACE_CARD)
 
         self._next_btn = ctk.CTkButton(
             self._nav_bar,
@@ -311,12 +317,14 @@ class WizardController(ctk.CTk):
             width=160,
             height=36,
             fg_color=INK,
-            hover_color=INK_DEEP,
+            hover_color=INK,
             text_color=ON_PRIMARY,
             font=font(size=BUTTON_MD, weight="bold"),
             corner_radius=ROUNDED_SM,
             command=self._on_next,
         )
+        _wire_button_motion(self._next_btn, base=INK,
+                            hover=INK_DEEP, active=INK_DEEP)
 
     def _show_page(self, index: int) -> None:
         if index < 0 or index >= len(PAGE_NAMES):
@@ -343,23 +351,29 @@ class WizardController(ctk.CTk):
             self._cancel_btn.configure(
                 text="Abort",
                 fg_color=DANGER,
-                hover_color=DANGER_HOVER,
+                hover_color=DANGER,
                 text_color=ON_PRIMARY,
                 border_width=0,
                 state="normal",
                 font=font(size=BUTTON_MD, weight="bold"),
             )
+            from wizard.pages._common import update_button_motion
+            update_button_motion(self._cancel_btn, base=DANGER,
+                                 hover=DANGER_HOVER, active=DANGER_ACTIVE)
         else:
             self._cancel_btn.configure(
                 text="Cancel",
                 fg_color=CANVAS,
-                hover_color=SURFACE_SOFT,
+                hover_color=CANVAS,
                 text_color=MUTE,
                 border_width=1,
                 border_color=HAIRLINE_STRONG,
                 state="normal",
                 font=font(size=BUTTON_MD, weight="normal"),
             )
+            from wizard.pages._common import update_button_motion
+            update_button_motion(self._cancel_btn, base=CANVAS,
+                                 hover=SURFACE_SOFT, active=SURFACE_CARD)
         self._cancel_btn.grid(row=0, column=2, padx=8, pady=18)
 
         self._next_btn.configure(state="disabled" if is_install else "normal")

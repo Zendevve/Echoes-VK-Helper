@@ -85,9 +85,8 @@ class InstallPage(ctk.CTkFrame):
         header.grid(row=0, column=0, sticky="ew", padx=24, pady=(24, 8))
         header.grid_columnconfigure(0, weight=1)
 
-        make_section_label(header, "[?]  Installing").grid(
-            row=0, column=0, sticky="ew"
-        )
+        self._section_lbl = make_section_label(header, "[?]  Installing")
+        self._section_lbl.grid(row=0, column=0, sticky="ew")
         make_hairline(header).grid(row=1, column=0, sticky="ew", pady=(8, 0))
         self._header_subtitle = make_subtitle(
             header,
@@ -168,6 +167,8 @@ class InstallPage(ctk.CTkFrame):
     def on_enter(self, state: WizardState) -> None:
         if not self._built:
             return
+        from wizard.anim import fade_in_labels
+        fade_in_labels([self._section_lbl, self._header_subtitle])
         self._abort_event.clear()
         self.progress.set(0.0)
         self.step_label.configure(text="[...]  preparing", text_color=INK)
@@ -394,7 +395,10 @@ class InstallPage(ctk.CTkFrame):
             state="normal",
             text="View results  >",
             fg_color=INK,
-            hover_color=INK_DEEP,
+            hover_color=INK,
             text_color=ON_PRIMARY,
             font=font(size=BUTTON_MD, weight="bold"),
         )
+        from wizard.pages._common import update_button_motion
+        update_button_motion(next_btn, base=INK,
+                             hover=INK_DEEP, active=INK_DEEP)

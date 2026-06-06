@@ -78,18 +78,17 @@ class WelcomePage(ctk.CTkFrame):
         header.grid(row=0, column=0, sticky="ew", pady=(0, 4))
         header.grid_columnconfigure(0, weight=1)
 
-        make_section_label(header, "[+]  What this wizard does").grid(
-            row=0, column=0, sticky="ew", padx=0
-        )
+        self._section_lbl = make_section_label(header, "[+]  What this wizard does")
+        self._section_lbl.grid(row=0, column=0, sticky="ew", padx=0)
         make_hairline(header).grid(row=1, column=0, sticky="ew", pady=(8, 0))
 
-        intro = make_subtitle(
+        self._intro_lbl = make_subtitle(
             body,
             "Configure LOTRO: Echoes of Angmar with the recommended Vulkan "
             "compatibility layer in a few clicks. Backups are created "
             "automatically. Nothing is deleted.",
         )
-        intro.grid(row=1, column=0, sticky="ew", pady=(12, 16))
+        self._intro_lbl.grid(row=1, column=0, sticky="ew", pady=(12, 16))
 
         stack = ctk.CTkFrame(body, fg_color=CANVAS, corner_radius=0)
         stack.grid(row=2, column=0, sticky="nsew")
@@ -224,12 +223,15 @@ class WelcomePage(ctk.CTkFrame):
             self._tools_toggle.configure(text="[+]  troubleshoot")
 
     def _mark_step_done(self, index: int) -> None:
+        from wizard.pages._common import set_status
         if 0 <= index < len(self._step_marks):
-            self._step_marks[index].configure(text="[x]", text_color=SUCCESS)
+            set_status(self._step_marks[index], "[x]", SUCCESS)
 
     def on_enter(self, state: "WizardState") -> None:
         state.gpu_check_done = False
         state.gpu_check_ok = False
+        from wizard.anim import fade_in_labels
+        fade_in_labels([self._section_lbl, self._intro_lbl])
         self._set_gpu_checking()
         self._start_gpu_check()
 
@@ -277,17 +279,18 @@ class WelcomePage(ctk.CTkFrame):
             self.after(120, self._drain_gpu)
 
     def _apply_gpu_result(self, result) -> None:
+        from wizard.pages._common import set_status
         state: "WizardState" = self.controller.context
         state.gpu_check_done = True
         state.gpu_check_ok = bool(result.ok)
         if result.ok:
-            self._gpu_status.configure(text="[+]", text_color=SUCCESS)
+            set_status(self._gpu_status, "[+]", SUCCESS)
             self._gpu_name_lbl.configure(
                 text=f"{result.name}  -  {result.reason}",
                 text_color=INK,
             )
         else:
-            self._gpu_status.configure(text="[x]", text_color=DANGER)
+            set_status(self._gpu_status, "[x]", DANGER)
             self._gpu_name_lbl.configure(
                 text=f"{result.name}  -  {result.reason}",
                 text_color=DANGER,

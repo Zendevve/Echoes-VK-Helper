@@ -12,6 +12,7 @@ from typing import Callable, Optional
 
 import customtkinter as ctk
 
+from wizard.anim import tween
 from wizard.controller import (
     BODY,
     BODY_MD,
@@ -148,6 +149,67 @@ def make_ascii_bullet(
     )
 
 
+def _wire_button_motion(
+    btn: ctk.CTkButton,
+    *,
+    base: str,
+    hover: str,
+    active: str,
+) -> ctk.CTkButton:
+    """Install hover/press tweens on a customtkinter button.
+
+    Customtkinter's built-in ``hover_color`` snaps instantly; we disable it by
+    setting it equal to the base color and drive the fg_color transition
+    ourselves via ``wizard.anim.tween``.
+    """
+    btn.configure(hover_color=base)
+    state = {"hovered": False, "pressed": False, "base": base,
+             "hover": hover, "active": active}
+
+    def _target() -> str:
+        if state["pressed"]:
+            return state["active"]
+        if state["hovered"]:
+            return state["hover"]
+        return state["base"]
+
+    def _animate() -> None:
+        tween(btn, attr="fg_color", start=state["base"], end=_target(),
+              duration_ms=100, steps=8, easing="ease_out")
+
+    btn.bind("<Enter>", lambda _e: (state.__setitem__("hovered", True), _animate()))
+    btn.bind("<Leave>", lambda _e: (state.__setitem__("hovered", False),
+                                    state.__setitem__("pressed", False), _animate()))
+    btn.bind("<Button-1>", lambda _e: (state.__setitem__("pressed", True), _animate()))
+    btn.bind("<ButtonRelease-1>", lambda _e: (state.__setitem__("pressed", False),
+                                              _animate()))
+    btn._evh_motion_state = state
+    return btn
+
+
+def update_button_motion(
+    btn: ctk.CTkButton,
+    *,
+    base: str,
+    hover: str,
+    active: str,
+) -> None:
+    """Re-target the hover/press tween colors for a button whose style was
+    updated externally (e.g. nav-bar buttons in the controller).
+    """
+    state = getattr(btn, "_evh_motion_state", None)
+    if state is None:
+        return
+    state["base"] = base
+    state["hover"] = hover
+    state["active"] = active
+    btn.configure(hover_color=base)
+    try:
+        btn.configure(fg_color=base)
+    except Exception:
+        pass
+
+
 def make_open_folder_button(
     parent: ctk.CTkBaseClass,
     text: str,
@@ -157,7 +219,7 @@ def make_open_folder_button(
         parent,
         text=text,
         fg_color=CANVAS,
-        hover_color=SURFACE_SOFT,
+        hover_color=CANVAS,
         text_color=INK,
         font=font(size=BUTTON_MD, weight="normal"),
         border_width=1,
@@ -166,7 +228,7 @@ def make_open_folder_button(
         height=36,
     )
     btn.configure(command=lambda: _open_in_explorer(path_provider()))
-    return btn
+    return _wire_button_motion(btn, base=CANVAS, hover=SURFACE_SOFT, active=SURFACE_CARD)
 
 
 def make_secondary_button(
@@ -174,11 +236,11 @@ def make_secondary_button(
     text: str,
     command: Callable[[], None],
 ) -> ctk.CTkButton:
-    return ctk.CTkButton(
+    btn = ctk.CTkButton(
         parent,
         text=text,
         fg_color=CANVAS,
-        hover_color=SURFACE_SOFT,
+        hover_color=CANVAS,
         text_color=INK,
         font=font(size=BUTTON_MD, weight="normal"),
         border_width=1,
@@ -187,6 +249,7 @@ def make_secondary_button(
         height=36,
         command=command,
     )
+    return _wire_button_motion(btn, base=CANVAS, hover=SURFACE_SOFT, active=SURFACE_CARD)
 
 
 def make_primary_button(
@@ -194,17 +257,18 @@ def make_primary_button(
     text: str,
     command: Callable[[], None],
 ) -> ctk.CTkButton:
-    return ctk.CTkButton(
+    btn = ctk.CTkButton(
         parent,
         text=text,
         fg_color=INK,
-        hover_color=INK_DEEP,
+        hover_color=INK,
         text_color=ON_PRIMARY,
         font=font(size=BUTTON_MD, weight="bold"),
         corner_radius=ROUNDED_SM,
         height=36,
         command=command,
     )
+    return _wire_button_motion(btn, base=INK, hover=INK_DEEP, active=INK_DEEP)
 
 
 def make_danger_button(
@@ -212,17 +276,35 @@ def make_danger_button(
     text: str,
     command: Callable[[], None],
 ) -> ctk.CTkButton:
-    return ctk.CTkButton(
+    btn = ctk.CTkButton(
         parent,
         text=text,
         fg_color=DANGER,
-        hover_color="#d70015",
+        hover_color=DANGER,
         text_color=ON_PRIMARY,
         font=font(size=BUTTON_MD, weight="bold"),
         corner_radius=ROUNDED_SM,
         height=36,
         command=command,
     )
+    return _wire_button_motion(btn, base=DANGER, hover="#d70015", active="#a50011")
+
+
+def set_status(
+    label: ctk.CTkLabel,
+    mark: str,
+    color: str,
+    *,
+    duration_ms: int = 180,
+) -> None:
+    """Animate a status marker (e.g. ``[?]`` -> ``[+]``) with a color tween.
+
+    The marker text swaps immediately so the user gets feedback at the same
+    beat, but the color eases in so the change reads as alive.
+    """
+    label.configure(text=mark)
+    tween(label, attr="text_color", start="#8a8a8a", end=color,
+          duration_ms=duration_ms, steps=12, easing="ease_out")
 
 
 def _open_in_explorer(target: Path | None) -> None:
