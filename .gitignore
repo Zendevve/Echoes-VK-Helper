@@ -1,1 +1,3 @@
 _screenshots/
+__pycache__/
+*.pyc
