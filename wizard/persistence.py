@@ -64,6 +64,7 @@ def save_state(context: WizardState) -> bool:
         "version": STATE_VERSION,
         "config_path": str(context.config_path) if context.config_path else None,
         "game_path": str(context.game_path) if context.game_path else None,
+        "resolution": list(context.resolution) if context.resolution else None,
     }
     path = _state_path()
     try:
@@ -86,6 +87,7 @@ def apply_to_context(context: WizardState, data: dict[str, Any]) -> None:
     """
     cfg_raw = data.get("config_path")
     game_raw = data.get("game_path")
+    res_raw = data.get("resolution")
 
     if isinstance(cfg_raw, str) and cfg_raw:
         cfg = Path(cfg_raw)
@@ -102,3 +104,11 @@ def apply_to_context(context: WizardState, data: dict[str, Any]) -> None:
             logger.info("Restored game_path: %s", game)
         else:
             logger.info("Persisted game_path no longer exists: %s", game)
+
+    if (
+        isinstance(res_raw, list)
+        and len(res_raw) == 2
+        and all(isinstance(x, int) and x > 0 for x in res_raw)
+    ):
+        context.resolution = (res_raw[0], res_raw[1])
+        logger.info("Restored resolution: %s", context.resolution)

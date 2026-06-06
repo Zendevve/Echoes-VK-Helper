@@ -18,6 +18,7 @@ from wizard.controller import (
     INK,
     MUTE,
     SUCCESS,
+    WARNING,
     WizardState,
     font,
     heading_font,
@@ -240,17 +241,22 @@ class DetectionPage(ctk.CTkFrame):
                 if kind == "config":
                     if value:
                         self._set_config_found(value)
-                    else:
+                    elif not self.controller.context.config_path:
                         self._set_config_missing()
                 elif kind == "game":
                     if value:
                         self._set_game_found(value, writable=None)
-                    else:
+                    elif not self.controller.context.game_path:
                         self._set_game_missing()
                 elif kind == "writable":
                     self._set_writability(value)
                 elif kind == "resolution":
-                    self.controller.context.resolution = value
+                    if (
+                        value
+                        and not self.controller.context.resolution
+                    ):
+                        self.controller.context.resolution = value
+                        self._persist()
                 elif kind == "error":
                     self.banner.configure(
                         text=f"[x]  detection error: {value}",
@@ -321,14 +327,24 @@ class DetectionPage(ctk.CTkFrame):
     def _browse_config(self) -> None:
         path = filedialog.askopenfilename(
             title="Choose UserPreferences.echoes.ini",
-            filetypes=[("Echoes config", "*.ini"), ("All files", "*.*")],
+            filetypes=[("Echoes config", "UserPreferences.echoes.ini"),
+                       ("All files", "*.*")],
         )
-        if path:
-            p = Path(path)
-            if p.is_file():
-                self._set_config_found(p)
-            else:
-                self._set_config_missing()
+        if not path:
+            return
+        p = Path(path)
+        if not p.is_file():
+            self._set_config_missing()
+            return
+        if p.name.lower() != "userpreferences.echoes.ini":
+            from wizard.anim import slide_banner_in
+            self.banner.configure(
+                text=f"[!]  please pick UserPreferences.echoes.ini, not '{p.name}'",
+                text_color=WARNING,
+            )
+            slide_banner_in(self.banner)
+            return
+        self._set_config_found(p)
 
     def _persist(self) -> None:
         try:
