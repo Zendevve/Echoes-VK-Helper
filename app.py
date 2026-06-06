@@ -6,6 +6,7 @@ import sys
 import traceback
 from pathlib import Path
 
+from core import __app_name__, __version__
 from core.elevation import consume_resume_argv, load_resume_state
 from core.logger import setup_logging
 from core.paths import assert_vulkan_assets_present, logs_dir
@@ -66,7 +67,7 @@ def _safe_setup_logging() -> None:
 
 def main() -> int:
     _safe_setup_logging()
-    logger.info("=== Echoes Vulkan Helper started ===")
+    logger.info("=== %s v%s started ===", __app_name__, __version__)
 
     if not _check_assets_or_warn():
         return 2
@@ -79,7 +80,7 @@ def main() -> int:
 
         app = WizardController(initial_state=initial_state)
         app.mainloop()
-        logger.info("=== Echoes Vulkan Helper exited cleanly ===")
+        logger.info("=== %s v%s exited cleanly ===", __app_name__, __version__)
         return 0
     except Exception:
         tb = traceback.format_exc()

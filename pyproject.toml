@@ -1,0 +1,91 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "echoes-vulkan-helper"
+dynamic = ["version"]
+description = "Windows helper that installs/repairs the Vulkan runtime for Echoes (and similar DX9-VK games)."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+authors = [{ name = "Echoes Tools" }]
+classifiers = [
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Games/Entertainment",
+    "Topic :: System :: Installation/Setup",
+    "Private :: Do Not Upload",
+]
+dependencies = [
+    "customtkinter>=5.2.0",
+    "screeninfo>=0.8.1",
+    "pywin32>=306; sys_platform == 'win32'",
+]
+
+[project.urls]
+Homepage = "https://github.com/"
+
+[tool.setuptools.dynamic]
+version = { attr = "core.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["core*", "wizard*", "tools*"]
+exclude = ["tests*", "build*", "dist*", "logs*", "_screenshots*"]
+
+# ------------------------------------------------------------------
+# ruff
+# ------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+extend-exclude = ["build", "dist", "logs", "_screenshots", ".venv", "venv"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "UP",  # pyupgrade
+    "N",   # pep8-naming
+    "SIM", # flake8-simplify
+    "RUF", # ruff-specific
+]
+ignore = [
+    "E501",   # line length handled by formatter
+    "B008",   # function-call-in-default-arg (FastAPI/click style)
+    "RUF012", # mutable class attrs (handled per-case)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["B", "N", "SIM"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+# ------------------------------------------------------------------
+# pytest
+# ------------------------------------------------------------------
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+    "--tb=short",
+]
+markers = [
+    "smoke: end-to-end smoke tests",
+    "gui: tests that require a display",
+]
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning:customtkinter.*",
+    "ignore::DeprecationWarning:tkinter.*",
+]

@@ -1,0 +1,81 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: Lint (ruff)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install ruff
+      - run: ruff check .
+      - run: ruff format --check .
+
+  test:
+    name: Tests (pytest)
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - name: Install locked dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.lock.txt
+          pip install pytest pytest-cov
+      - name: Run tests (skip GUI on headless)
+        run: |
+          set PYTEST_DISABLE_GUI=1
+          pytest -m "not gui" --cov=core --cov=wizard --cov=tools --cov-report=term-missing
+      - name: Upload coverage
+        if: matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: .coverage
+          retention-days: 7
+
+  build-smoke:
+    name: PyInstaller build smoke
+    runs-on: windows-latest
+    needs: [lint, test]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.lock.txt
+          pip install pyinstaller
+      - name: Build
+        run: pyinstaller --noconfirm app.spec
+      - name: Verify exe exists
+        shell: pwsh
+        run: |
+          $exe = "dist/EchoesVulkanHelper.exe"
+          if (-not (Test-Path $exe)) { throw "$exe missing" }
+          $size = (Get-Item $exe).Length
+          Write-Host "Built $exe ($([math]::Round($size/1MB,2)) MB)"
+      - name: Upload exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: EchoesVulkanHelper-${{ github.sha }}
+          path: dist/EchoesVulkanHelper.exe
