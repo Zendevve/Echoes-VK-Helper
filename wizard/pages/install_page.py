@@ -20,11 +20,14 @@ import customtkinter as ctk
 
 from core.logger import attach_ui_queue, detach_ui_queue
 from wizard.controller import (
+    BUTTON_MD,
     CANVAS,
     DANGER,
     HAIRLINE,
     INK,
+    INK_DEEP,
     ON_DARK,
+    ON_PRIMARY,
     SUCCESS,
     SURFACE_DARK,
     SURFACE_DARK_ELEVATED,
@@ -385,4 +388,13 @@ class InstallPage(ctk.CTkFrame):
                 text_color=INK if success else DANGER,
             )
             self.progress.set(1.0)
-        self.controller.after(600, lambda: self.controller.go_to("completion"))
+
+        next_btn = self.controller._next_btn
+        next_btn.configure(
+            state="normal",
+            text="View results  >",
+            fg_color=INK,
+            hover_color=INK_DEEP,
+            text_color=ON_PRIMARY,
+            font=font(size=BUTTON_MD, weight="bold"),
+        )
