@@ -265,6 +265,7 @@ class DetectionPage(ctk.CTkFrame):
         self.config_status.configure(text=MARK_OK, text_color=SUCCESS)
         self.config_path_lbl.configure(text=str(path))
         self.config_browse_btn.configure(state="normal", command=self._browse_config)
+        self._persist()
         self._evaluate_advance()
 
     def _set_config_missing(self) -> None:
@@ -281,6 +282,7 @@ class DetectionPage(ctk.CTkFrame):
         self.game_browse_btn.configure(state="normal", command=self._browse_game)
         if writable is not None:
             self._set_writability(writable)
+        self._persist()
         self._evaluate_advance()
 
     def _set_game_missing(self) -> None:
@@ -321,6 +323,14 @@ class DetectionPage(ctk.CTkFrame):
                 self._set_config_found(p)
             else:
                 self._set_config_missing()
+
+    def _persist(self) -> None:
+        try:
+            from wizard.persistence import save_state
+
+            save_state(self.controller.context)
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Failed to persist detection state: %s", exc)
 
     def _browse_game(self) -> None:
         path = filedialog.askdirectory(title="Choose the folder containing lotroclient.exe")

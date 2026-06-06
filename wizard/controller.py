@@ -147,11 +147,26 @@ class WizardController(ctk.CTk):
         self._current_index: int = 0
         self._nav_callbacks: dict[str, Callable[[], None]] = {}
 
+        self._restore_persisted_paths()
         self._build_layout()
         self._build_pages()
         self._build_brand_bar()
         self._build_nav_bar()
         self._show_initial_page()
+
+    def _restore_persisted_paths(self) -> None:
+        """Reload last-known config + game paths from disk so the user does
+        not have to re-browse on every run. Stale paths are dropped silently
+        and auto-detection runs as normal.
+        """
+        try:
+            from wizard.persistence import apply_to_context, load_state
+
+            data = load_state()
+            if data:
+                apply_to_context(self.context, data)
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("Persisted state restore failed: %s", exc)
 
     def _show_initial_page(self) -> None:
         if getattr(self.context, "_resume_install", False):
