@@ -1,7 +1,10 @@
-"""Quick GUI smoke test: launch the wizard and capture a screenshot."""
+"""Quick GUI smoke test: launch the wizard and capture screenshots of the app window only."""
 from __future__ import annotations
 
+import ctypes
+import ctypes.wintypes as wt
 import sys
+import time
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -10,7 +13,65 @@ import customtkinter as ctk
 
 ctk.set_appearance_mode("dark")
 
-from wizard.controller import WizardController, WizardState
+from wizard.controller import WizardController
+
+
+def _capture_hwnd(hwnd: int, out_path: Path) -> bool:
+    user32 = ctypes.windll.user32
+    gdi32 = ctypes.windll.gdi32
+
+    rect = wt.RECT()
+    if not user32.GetClientRect(hwnd, ctypes.byref(rect)):
+        return False
+    w = rect.right - rect.left
+    h = rect.bottom - rect.top
+    if w <= 0 or h <= 0:
+        return False
+
+    hdc_window = user32.GetDC(hwnd)
+    hdc_mem = gdi32.CreateCompatibleDC(hdc_window)
+    hbm = gdi32.CreateCompatibleBitmap(hdc_window, w, h)
+    gdi32.SelectObject(hdc_mem, hbm)
+
+    PW_RENDERFULLCONTENT = 0x00000002
+    user32.PrintWindow(hwnd, hdc_mem, PW_RENDERFULLCONTENT)
+
+    class BITMAPINFOHEADER(ctypes.Structure):
+        _fields_ = [
+            ("biSize", wt.DWORD),
+            ("biWidth", ctypes.c_long),
+            ("biHeight", ctypes.c_long),
+            ("biPlanes", wt.WORD),
+            ("biBitCount", wt.WORD),
+            ("biCompression", wt.DWORD),
+            ("biSizeImage", wt.DWORD),
+            ("biXPelsPerMeter", ctypes.c_long),
+            ("biYPelsPerMeter", ctypes.c_long),
+            ("biClrUsed", wt.DWORD),
+            ("biClrImportant", wt.DWORD),
+        ]
+
+    bmi = BITMAPINFOHEADER()
+    bmi.biSize = ctypes.sizeof(BITMAPINFOHEADER)
+    bmi.biWidth = w
+    bmi.biHeight = -h
+    bmi.biPlanes = 1
+    bmi.biBitCount = 32
+    bmi.biCompression = 0
+
+    buf = (ctypes.c_ubyte * (w * h * 4))()
+    gdi32.GetDIBits(hdc_mem, hbm, 0, h, buf, ctypes.byref(bmi), 0)
+
+    gdi32.DeleteObject(hbm)
+    gdi32.DeleteDC(hdc_mem)
+    user32.ReleaseDC(hwnd, hdc_window)
+
+    from PIL import Image
+
+    img = Image.frombuffer("RGBA", (w, h), bytes(buf), "raw", "BGRA", 0, 1)
+    img = img.convert("RGB")
+    img.save(out_path)
+    return True
 
 
 def main() -> int:
@@ -18,45 +79,27 @@ def main() -> int:
     out_dir.mkdir(exist_ok=True)
 
     app = WizardController()
-    app.geometry("900x640")
+    app.geometry("900x640+200+200")
     app.update_idletasks()
     app.update()
+    time.sleep(0.5)
 
-    # Screenshot each page
+    hwnd = int(app.winfo_id())
+    top = ctypes.windll.user32.GetParent(hwnd) or hwnd
+    top = ctypes.windll.user32.GetAncestor(hwnd, 2) or top
+
     page_names = ["welcome", "detection", "summary", "install", "completion"]
     for i, name in enumerate(page_names):
         app._show_page(i)
         app.update_idletasks()
         app.update()
-        time_delay = 1.5 if name in ("install", "completion") else 0.4
-        # Wait for any auto-detection threads
-        if name == "detection":
-            import time as _t
-            _t.sleep(2.0)
-        else:
-            import time as _t
-            _t.sleep(time_delay)
+        wait = 2.0 if name == "detection" else 0.4
+        time.sleep(wait)
         app.update_idletasks()
         app.update()
         path = out_dir / f"page_{i+1}_{name}.png"
-        try:
-            import subprocess
-            # PowerShell screenshot of the window
-            ps = (
-                f"Add-Type -AssemblyName System.Drawing,System.Windows.Forms;"
-                f"$b=[System.Windows.Forms.Screen]::PrimaryScreen.Bounds;"
-                f"$bmp=New-Object System.Drawing.Bitmap $b.Width,$b.Height;"
-                f"$g=[System.Drawing.Graphics]::FromImage($bmp);"
-                f"$g.CopyFromScreen($b.Location,[System.Drawing.Point]::Empty,$b.Size);"
-                f"$bmp.Save('{path.as_posix()}');"
-                f"$g.Dispose();$bmp.Dispose();"
-            )
-            subprocess.run(["powershell", "-NoProfile", "-Command", ps], check=False)
-            print(f"Captured {name}: {path}")
-        except Exception as exc:
-            print(f"Failed to capture {name}: {exc}")
-        app.update_idletasks()
-        app.update()
+        ok = _capture_hwnd(top, path)
+        print(f"Captured {name}: {path} ({'ok' if ok else 'FAIL'})")
 
     app.destroy()
     return 0

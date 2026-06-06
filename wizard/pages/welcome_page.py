@@ -23,7 +23,6 @@ from wizard.controller import (
     MUTE,
     ON_DARK,
     SUCCESS,
-    SURFACE_DARK,
     SURFACE_SOFT,
     font,
     heading_font,
@@ -32,7 +31,6 @@ from wizard.pages._common import (
     MARK_OK,
     MARK_PENDING,
     make_ascii_bullet,
-    make_dark_card,
     make_hairline,
     make_section_label,
     make_soft_card,
@@ -47,22 +45,7 @@ logger = logging.getLogger(__name__)
 CONFIG_RELATIVE = Path("Lord of the Rings Online") / "UserPreferences.echoes.ini"
 
 
-TUI_HERO_LINES: tuple[str, ...] = (
-    "",
-    "  ECHOES VULKAN HELPER",
-    "  ─────────────────────",
-    "",
-    "  [+]  detect config and game install",
-    "  [+]  back up files",
-    "  [+]  install dxvk vulkan layer",
-    "  [+]  apply recommended settings",
-    "  [+]  verify",
-    "",
-    "  $ run install",
-    "  > ready",
-    "",
-    "  tab  next  ·  ctrl-p  abort",
-)
+
 
 
 class WelcomePage(ctk.CTkFrame):
@@ -76,38 +59,19 @@ class WelcomePage(ctk.CTkFrame):
 
     def _build(self) -> None:
         self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(0, weight=0)
-        self.grid_rowconfigure(1, weight=1)
-        self.grid_rowconfigure(2, weight=0)
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_rowconfigure(1, weight=0)
 
-        self._build_hero(self)
         self._build_body(self)
         self._build_footer(self)
 
-    def _build_hero(self, parent: ctk.CTkFrame) -> None:
-        hero = make_dark_card(parent)
-        hero.grid(row=0, column=0, sticky="ew", padx=0, pady=0)
-        hero.grid_columnconfigure(0, weight=1)
-
-        tui_text = "\n".join(TUI_HERO_LINES)
-        tui = ctk.CTkLabel(
-            hero,
-            text=tui_text,
-            font=font(size=12, weight="normal"),
-            text_color=ON_DARK,
-            anchor="w",
-            justify="left",
-        )
-        tui.grid(row=0, column=0, sticky="ew", padx=24, pady=18)
-
     def _build_body(self, parent: ctk.CTkFrame) -> None:
         body = ctk.CTkFrame(parent, fg_color=CANVAS, corner_radius=0)
-        body.grid(row=1, column=0, sticky="nsew", padx=24, pady=12)
+        body.grid(row=0, column=0, sticky="nsew", padx=24, pady=24)
         body.grid_columnconfigure(0, weight=1)
         body.grid_rowconfigure(0, weight=0)
         body.grid_rowconfigure(1, weight=0)
         body.grid_rowconfigure(2, weight=1)
-        body.grid_rowconfigure(3, weight=0)
 
         header = ctk.CTkFrame(body, fg_color=CANVAS, corner_radius=0)
         header.grid(row=0, column=0, sticky="ew", pady=(0, 4))
@@ -124,7 +88,7 @@ class WelcomePage(ctk.CTkFrame):
             "compatibility layer in a few clicks. Backups are created "
             "automatically. Nothing is deleted.",
         )
-        intro.grid(row=1, column=0, sticky="ew", pady=(8, 12))
+        intro.grid(row=1, column=0, sticky="ew", pady=(12, 16))
 
         stack = ctk.CTkFrame(body, fg_color=CANVAS, corner_radius=0)
         stack.grid(row=2, column=0, sticky="nsew")
@@ -133,20 +97,10 @@ class WelcomePage(ctk.CTkFrame):
         stack.grid_rowconfigure(1, weight=1)
 
         self._gpu_card, self._gpu_status, self._gpu_name_lbl = self._build_gpu_card(stack)
-        self._gpu_card.grid(row=0, column=0, sticky="ew", pady=(0, 12))
+        self._gpu_card.grid(row=0, column=0, sticky="ew", pady=(0, 16))
 
         self._step_rows_frame = self._build_step_rows(stack)
         self._step_rows_frame.grid(row=1, column=0, sticky="nsew")
-
-        reassurance = ctk.CTkLabel(
-            body,
-            text="No existing files will be deleted. Backups are created automatically.",
-            font=font(size=13),
-            text_color=MUTE,
-            anchor="w",
-            justify="left",
-        )
-        reassurance.grid(row=3, column=0, sticky="ew", pady=(8, 0))
 
     def _build_step_rows(self, parent: ctk.CTkFrame) -> ctk.CTkFrame:
         card = make_soft_card(parent)

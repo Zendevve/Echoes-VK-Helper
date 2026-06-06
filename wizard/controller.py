@@ -22,40 +22,40 @@ logger = logging.getLogger(__name__)
 
 
 # --- Brand & accent ---------------------------------------------------------
-INK = "#201d1d"
-INK_DEEP = "#0f0000"
-ON_PRIMARY = "#fdfcfc"
-ON_DARK = "#fdfcfc"
+INK = "#f5f5f5"
+INK_DEEP = "#ffffff"
+ON_PRIMARY = "#1a1a1a"
+ON_DARK = "#f5f5f5"
 
 # --- Surface -----------------------------------------------------------------
-CANVAS = "#fdfcfc"
-SURFACE_SOFT = "#f8f7f7"
-SURFACE_CARD = "#f1eeee"
-SURFACE_DARK = "#201d1d"
-SURFACE_DARK_ELEVATED = "#302c2c"
-HAIRLINE = "#ebe3df"
-HAIRLINE_STRONG = "#646262"
+CANVAS = "#1a1a1a"
+SURFACE_SOFT = "#202020"
+SURFACE_CARD = "#252525"
+SURFACE_DARK = "#0d0d0d"
+SURFACE_DARK_ELEVATED = "#2a2a2a"
+HAIRLINE = "#2a2a2a"
+HAIRLINE_STRONG = "#4a4a4a"
 
 # --- Text ladder -------------------------------------------------------------
-CHARCOAL = "#302c2c"
-BODY = "#424245"
-MUTE = "#646262"
-STONE = "#6e6e73"
-ASH = "#9a9898"
+CHARCOAL = "#e0e0e0"
+BODY = "#d0d0d0"
+MUTE = "#8a8a8a"
+STONE = "#787878"
+ASH = "#5a5a5a"
 
-# --- Semantic (Apple HIG ramp; used sparingly on marketing chrome) -----------
+# --- Semantic (Apple HIG ramp) -----------------------------------------------
 ACCENT = "#007aff"
-ACCENT_HOVER = "#0056b3"
-ACCENT_ACTIVE = "#004085"
+ACCENT_HOVER = "#339cff"
+ACCENT_ACTIVE = "#66b3ff"
 DANGER = "#ff3b30"
-DANGER_HOVER = "#d70015"
-DANGER_ACTIVE = "#a50011"
+DANGER_HOVER = "#ff5e54"
+DANGER_ACTIVE = "#ff8077"
 WARNING = "#ff9f0a"
-WARNING_HOVER = "#cc7f08"
-WARNING_ACTIVE = "#995f06"
+WARNING_HOVER = "#ffb340"
+WARNING_ACTIVE = "#ffc773"
 SUCCESS = "#30d158"
-SUCCESS_HOVER = "#28b349"
-SUCCESS_ACTIVE = "#1f8a39"
+SUCCESS_HOVER = "#5ddc7d"
+SUCCESS_ACTIVE = "#8ae6a3"
 
 # --- Typography --------------------------------------------------------------
 # Berkeley Mono is the brand face. On Windows it is not preinstalled, so the
@@ -139,7 +139,7 @@ class WizardController(ctk.CTk):
         self.minsize(860, 640)
         self.configure(fg_color=CANVAS)
 
-        ctk.set_appearance_mode("light")
+        ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("blue")
 
         self.context: WizardState = initial_state or WizardState()

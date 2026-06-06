@@ -24,7 +24,6 @@ from wizard.pages._common import (
     MARK_OK,
     make_card,
     make_danger_button,
-    make_dark_card,
     make_hairline,
     make_open_folder_button,
     make_primary_button,
@@ -105,31 +104,6 @@ class CompletionPage(ctk.CTkFrame):
         for w in self.body.winfo_children():
             w.destroy()
 
-        # TUI-style success card
-        tui = make_dark_card(self.body)
-        tui.grid(row=0, column=0, sticky="ew", pady=(0, 8))
-        tui.grid_columnconfigure(0, weight=1)
-
-        banner_lines = (
-            "",
-            "  $ run install",
-            "  [+] all checks passed",
-            "  [+] vulkan files installed",
-            "  [+] config updated",
-            "  [+] backups created",
-            "",
-            "  > ready to launch",
-            "",
-        )
-        ctk.CTkLabel(
-            tui,
-            text="\n".join(banner_lines),
-            font=font(size=13, weight="normal"),
-            text_color=ON_DARK,
-            anchor="w",
-            justify="left",
-        ).grid(row=0, column=0, sticky="ew", padx=24, pady=20)
-
         lines = [
             "Configuration updated successfully.",
             "Vulkan files installed successfully.",
@@ -137,7 +111,7 @@ class CompletionPage(ctk.CTkFrame):
             "Validation passed.",
         ]
         for i, line in enumerate(lines):
-            self._status_row(self.body, line, ok=True, row=1 + i)
+            self._status_row(self.body, line, ok=True, row=i)
 
         actions = ctk.CTkFrame(self.body, fg_color=CANVAS, corner_radius=0)
         actions.grid(row=10, column=0, sticky="ew", pady=(16, 8))
