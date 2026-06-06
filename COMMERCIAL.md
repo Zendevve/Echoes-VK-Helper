@@ -34,10 +34,12 @@ disclosing your source, you need a commercial license.
 
 ## Contact
 
-Open a discussion in the
-[Commercial Licensing](https://github.com/Zendevve/Echoes-VK-Helper/discussions/categories/commercial-licensing)
-category with a short description of what you want to do. Replies usually within
-2 business days. One license, one project, one quote.
+Email [zendevve@duck.com](mailto:zendevve@duck.com) with a short description of
+what you want to do. Replies usually within 2 business days. One license, one
+project, one quote.
+
+DuckDuckGo Email Protection is used, so the address will continue to forward
+even if the underlying mailbox changes.
 
 ## Pricing
 
