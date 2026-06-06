@@ -1,4 +1,5 @@
 """Resource path resolution for dev runs and PyInstaller --onefile builds."""
+
 from __future__ import annotations
 
 import logging

@@ -7,6 +7,7 @@ The progress + live log render inside the system's single dark surface to echo
 the hero TUI mockup from the welcome page. The dark surface is reserved for
 these two moments only.
 """
+
 from __future__ import annotations
 
 import contextlib
@@ -156,7 +157,9 @@ class InstallPage(ctk.CTkFrame):
         )
         log_title.grid(row=0, column=0, sticky="ew", padx=20, pady=(16, 6))
 
-        log_divider = ctk.CTkFrame(log_card, fg_color=SURFACE_DARK_ELEVATED, height=1, corner_radius=0)
+        log_divider = ctk.CTkFrame(
+            log_card, fg_color=SURFACE_DARK_ELEVATED, height=1, corner_radius=0
+        )
         log_divider.grid(row=0, column=0, sticky="sew", padx=20)
 
         self.log_box = ctk.CTkTextbox(
@@ -173,6 +176,7 @@ class InstallPage(ctk.CTkFrame):
         if not self._built:
             return
         from wizard.anim import fade_in_labels
+
         fade_in_labels([self._section_lbl, self._header_subtitle])
         self._abort_event.clear()
         self.progress.set(0.0)
@@ -215,19 +219,13 @@ class InstallPage(ctk.CTkFrame):
         if self._watchdog_after is not None:
             with contextlib.suppress(Exception):
                 self.after_cancel(self._watchdog_after)
-        self._watchdog_after = self.after(
-            int(WATCHDOG_SECONDS * 1000), self._watchdog_tick
-        )
+        self._watchdog_after = self.after(int(WATCHDOG_SECONDS * 1000), self._watchdog_tick)
 
     def _watchdog_tick(self) -> None:
         if self._worker is not None and self._worker.is_alive():
-            self._append_log(
-                f"[!] install has been running for over {int(WATCHDOG_SECONDS)}s."
-            )
+            self._append_log(f"[!] install has been running for over {int(WATCHDOG_SECONDS)}s.")
             self._append_log("    click Abort to stop, or wait for it to finish.")
-            self._watchdog_after = self.after(
-                int(WATCHDOG_SECONDS * 1000), self._watchdog_tick
-            )
+            self._watchdog_after = self.after(int(WATCHDOG_SECONDS * 1000), self._watchdog_tick)
 
     def _start_install(self) -> None:
         attach_ui_queue(self._q)
@@ -253,20 +251,41 @@ class InstallPage(ctk.CTkFrame):
                 return
 
             self._check_abort()
-            self._paced("creating backup", "[...]  creating backup", 5,
-                        self._run_step_backup, state)
+            self._paced(
+                "creating backup", "[...]  creating backup", 5, self._run_step_backup, state
+            )
             self._check_abort()
-            self._paced("detecting resolution", "[...]  detecting resolution", 25,
-                        self._run_step_resolution, state)
+            self._paced(
+                "detecting resolution",
+                "[...]  detecting resolution",
+                25,
+                self._run_step_resolution,
+                state,
+            )
             self._check_abort()
-            self._paced("updating configuration", "[...]  updating configuration", 40,
-                        self._run_step_config, state)
+            self._paced(
+                "updating configuration",
+                "[...]  updating configuration",
+                40,
+                self._run_step_config,
+                state,
+            )
             self._check_abort()
-            self._paced("installing vulkan files", "[...]  installing vulkan files", 60,
-                        self._run_step_vulkan, state)
+            self._paced(
+                "installing vulkan files",
+                "[...]  installing vulkan files",
+                60,
+                self._run_step_vulkan,
+                state,
+            )
             self._check_abort()
-            self._paced("running validation", "[...]  running validation", 90,
-                        self._run_step_validation, state)
+            self._paced(
+                "running validation",
+                "[...]  running validation",
+                90,
+                self._run_step_validation,
+                state,
+            )
             self._step("[x]  done.", 100)
             self._q.put(("done",))
         except InstallAbortedError as exc:
@@ -316,14 +335,17 @@ class InstallPage(ctk.CTkFrame):
 
     def _run_step_resolution(self, state: WizardState) -> None:
         if state.resolution is not None:
-            self._q.put(("log",
-                         f"    - using cached resolution: {state.resolution[0]}x{state.resolution[1]}"))
+            self._q.put(
+                (
+                    "log",
+                    f"    - using cached resolution: {state.resolution[0]}x{state.resolution[1]}",
+                )
+            )
             return
         from core.resolution import get_native_resolution
 
         state.resolution = get_native_resolution()
-        self._q.put(("log",
-                     f"    - native: {state.resolution[0]}x{state.resolution[1]}"))
+        self._q.put(("log", f"    - native: {state.resolution[0]}x{state.resolution[1]}"))
 
     def _run_step_config(self, state: WizardState) -> None:
         if not state.config_path:
@@ -456,5 +478,5 @@ class InstallPage(ctk.CTkFrame):
             font=font(size=BUTTON_MD, weight="bold"),
         )
         from wizard.pages._common import update_button_motion
-        update_button_motion(next_btn, base=INK,
-                             hover=INK_DEEP, active=INK_DEEP)
+
+        update_button_motion(next_btn, base=INK, hover=INK_DEEP, active=INK_DEEP)

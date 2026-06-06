@@ -1,4 +1,5 @@
 """Step 3 - Installation summary page."""
+
 from __future__ import annotations
 
 import logging
@@ -161,7 +162,9 @@ class SummaryPage(ctk.CTkFrame):
 
     def _populate_backup_rows(self) -> None:
         self._row(self.backup_card, "Config backup (rotated, .bak chain)", "1 file")
-        self._row(self.backup_card, "Existing DLL/INI backups (rotated, .backup chain)", "as needed")
+        self._row(
+            self.backup_card, "Existing DLL/INI backups (rotated, .backup chain)", "as needed"
+        )
 
     def _populate_monitor_row(self) -> None:
         from core.resolution import curated_modes, get_native_resolution

@@ -1,4 +1,5 @@
 """Install the bundled Vulkan compatibility files into the game directory."""
+
 from __future__ import annotations
 
 import logging
@@ -18,6 +19,7 @@ BACKUP_SUFFIX = ".backup"
 @dataclass
 class VulkanInstallResult:
     """Record of every mutation made during install, for rollback."""
+
     installed: list[Path] = field(default_factory=list)
     rotated_backups: list[Path] = field(default_factory=list)
 

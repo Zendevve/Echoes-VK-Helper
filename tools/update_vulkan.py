@@ -14,6 +14,7 @@ the most common way an update silently breaks.
 Run this with the helper EXE closed - Windows will refuse to overwrite a DLL
 that's currently mapped into a running process.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -83,22 +84,16 @@ def verify_zip(zip_path: Path) -> dict[str, FileInfo]:
             names = zf.namelist()
             bad = [n for n in names if n != Path(n).name]
             if bad:
-                raise UpdateError(
-                    "Archive contains files in subdirectories: " + ", ".join(bad)
-                )
+                raise UpdateError("Archive contains files in subdirectories: " + ", ".join(bad))
 
             present = set(names)
             missing = [r for r in REQUIRED_FILES if r not in present]
             if missing:
-                raise UpdateError(
-                    "Archive is missing required files: " + ", ".join(missing)
-                )
+                raise UpdateError("Archive is missing required files: " + ", ".join(missing))
 
             extras = sorted(present - set(REQUIRED_FILES))
             if extras:
-                raise UpdateError(
-                    "Archive contains unexpected files: " + ", ".join(extras)
-                )
+                raise UpdateError("Archive contains unexpected files: " + ", ".join(extras))
 
             infos: dict[str, FileInfo] = {}
             for name in REQUIRED_FILES:
@@ -296,10 +291,21 @@ def build_parser() -> argparse.ArgumentParser:
         prog="update_vulkan",
         description="Update bundled Vulkan / DXVK files from a provider zip.",
     )
-    p.add_argument("zip", nargs="?", type=Path, help="Path to the provider's zip (required unless --rollback).")
-    p.add_argument("--dest", type=Path, default=Path("assets/vulkan"), help="Destination directory (default: assets/vulkan).")
+    p.add_argument(
+        "zip", nargs="?", type=Path, help="Path to the provider's zip (required unless --rollback)."
+    )
+    p.add_argument(
+        "--dest",
+        type=Path,
+        default=Path("assets/vulkan"),
+        help="Destination directory (default: assets/vulkan).",
+    )
     p.add_argument("--check", action="store_true", help="Verify the zip only; do not install.")
-    p.add_argument("--rollback", action="store_true", help="Restore the previous snapshot taken by the last install.")
+    p.add_argument(
+        "--rollback",
+        action="store_true",
+        help="Restore the previous snapshot taken by the last install.",
+    )
     p.add_argument("--yes", action="store_true", help="Skip confirmation prompts.")
     p.add_argument("-v", "--verbose", action="store_true", help="Verbose logging.")
     return p

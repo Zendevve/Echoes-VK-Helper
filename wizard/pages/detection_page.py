@@ -1,4 +1,5 @@
 """Step 2 - Detection page (auto-detect config + game + writability)."""
+
 from __future__ import annotations
 
 import logging
@@ -175,6 +176,7 @@ class DetectionPage(ctk.CTkFrame):
         self.controller.context.needs_elevation = False
 
         from wizard.anim import fade_in_labels, slide_banner_in
+
         fade_in_labels([self._section_lbl, self._subtitle_lbl])
         slide_banner_in(self.banner)
 
@@ -189,6 +191,7 @@ class DetectionPage(ctk.CTkFrame):
 
         if game_known:
             from core.game_detector import is_writable as _iw
+
             self._set_game_found(state.game_path, writable=_iw(state.game_path))
         else:
             set_status(self.game_status, MARK_PENDING, MUTE)
@@ -248,10 +251,7 @@ class DetectionPage(ctk.CTkFrame):
                 elif kind == "writable":
                     self._set_writability(value)
                 elif kind == "resolution":
-                    if (
-                        value
-                        and not self.controller.context.resolution
-                    ):
+                    if value and not self.controller.context.resolution:
                         self.controller.context.resolution = value
                         self._persist()
                 elif kind == "error":
@@ -303,6 +303,7 @@ class DetectionPage(ctk.CTkFrame):
         ctx = self.controller.context
         ctx.needs_elevation = not writable
         from wizard.anim import slide_banner_in
+
         if writable:
             self.banner.configure(
                 text="[+]  game folder is writable, no elevation needed",
@@ -317,15 +318,16 @@ class DetectionPage(ctk.CTkFrame):
 
     def _evaluate_advance(self) -> None:
         s = self.controller.context
-        self._can_advance = bool(s.config_path and s.config_path.is_file() and s.game_path and s.game_path.is_dir())
+        self._can_advance = bool(
+            s.config_path and s.config_path.is_file() and s.game_path and s.game_path.is_dir()
+        )
         if self._can_advance:
             self.controller._refresh_next_state()
 
     def _browse_config(self) -> None:
         path = filedialog.askopenfilename(
             title="Choose UserPreferences.echoes.ini",
-            filetypes=[("Echoes config", "UserPreferences.echoes.ini"),
-                       ("All files", "*.*")],
+            filetypes=[("Echoes config", "UserPreferences.echoes.ini"), ("All files", "*.*")],
         )
         if not path:
             return
@@ -335,6 +337,7 @@ class DetectionPage(ctk.CTkFrame):
             return
         if p.name.lower() != "userpreferences.echoes.ini":
             from wizard.anim import slide_banner_in
+
             self.banner.configure(
                 text=f"[!]  please pick UserPreferences.echoes.ini, not '{p.name}'",
                 text_color=WARNING,

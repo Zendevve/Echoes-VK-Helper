@@ -1,4 +1,5 @@
 """Thread-safe logging: rotating file + optional QueueHandler for the UI."""
+
 from __future__ import annotations
 
 import logging
@@ -78,7 +79,9 @@ def setup_logging(log_dir: Path) -> logging.Logger:
         root.addHandler(stream)
         root.warning(
             "Could not open log file in %s (%s); using temp fallback %s",
-            log_dir, exc, fallback,
+            log_dir,
+            exc,
+            fallback,
         )
         try:
             _attach_file_handler(fallback)

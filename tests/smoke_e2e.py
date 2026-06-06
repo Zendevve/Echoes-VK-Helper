@@ -3,6 +3,7 @@
 Runs the install worker against a temp game directory and verifies the
 completion page reports all checks passed.
 """
+
 from __future__ import annotations
 
 import sys
@@ -32,9 +33,7 @@ def main() -> int:
             (game_dir / name).write_bytes(b"placeholder")
 
         config_path = td / "UserPreferences.echoes.ini"
-        config_path.write_text(
-            "[General]\nSomeOther=keep\nFullscreen=False\n", encoding="utf-8"
-        )
+        config_path.write_text("[General]\nSomeOther=keep\nFullscreen=False\n", encoding="utf-8")
 
         state = WizardState(
             config_path=config_path,
@@ -58,11 +57,13 @@ def main() -> int:
             (fake_src / name).write_bytes(b"FAKE_BINARY_" + name.encode())
 
         import core.vulkan_installer as vi
+
         original = vi.vulkan_source_dir
         vi.vulkan_source_dir = lambda: fake_src  # type: ignore[assignment]
 
         install_page = app._pages["install"]
         import threading
+
         t = threading.Thread(target=install_page._run_install, name="install-test", daemon=True)
         t.start()
         t.join(timeout=15)
@@ -71,6 +72,7 @@ def main() -> int:
         vi.vulkan_source_dir = original  # type: ignore[assignment]
 
         import queue as _q
+
         while not install_page._q.empty():
             try:
                 evt = install_page._q.get_nowait()
@@ -84,6 +86,7 @@ def main() -> int:
             print("validation:", state.validation)
 
         import shutil
+
         shutil.rmtree(fake_src, ignore_errors=True)
 
         for name in ("dinput8.ini", "dinput8.dll", "d3d9.dll"):
@@ -101,4 +104,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
-

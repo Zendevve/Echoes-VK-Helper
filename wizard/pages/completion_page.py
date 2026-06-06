@@ -1,4 +1,5 @@
 """Step 5 - Completion page (success or failure state)."""
+
 from __future__ import annotations
 
 import logging
@@ -156,14 +157,14 @@ class CompletionPage(ctk.CTkFrame):
 
         details_btn_row = 10
         details_frame = ctk.CTkFrame(self.body, fg_color=CANVAS, corner_radius=0)
-        details_frame.grid(
-            row=details_btn_row, column=0, sticky="ew", pady=(8, 0)
-        )
+        details_frame.grid(row=details_btn_row, column=0, sticky="ew", pady=(8, 0))
         details_frame.grid_columnconfigure(0, weight=1)
 
         self._details_visible = False
         toggle_btn = make_secondary_button(
-            details_frame, "[+]  show details", lambda: self._toggle_failure_details(groups, details_btn_row + 1)
+            details_frame,
+            "[+]  show details",
+            lambda: self._toggle_failure_details(groups, details_btn_row + 1),
         )
         toggle_btn.grid(row=0, column=0, sticky="w")
         self._failure_details_toggle = toggle_btn
@@ -197,21 +198,33 @@ class CompletionPage(ctk.CTkFrame):
 
     def _build_failure_groups(self, validation: dict) -> list[tuple[str, int, int]]:
         checks = [
-            ("[+]  setup", [
-                ("configuration file present", bool(validation.get("config_found"))),
-                ("config backup present", bool(validation.get("backup_found"))),
-                ("game installation present", bool(validation.get("game_found"))),
-            ]),
-            ("[+]  settings", [
-                ("recommended settings applied", bool(validation.get("settings_applied"))),
-                ("Fullscreen = True", bool(validation.get("fullscreen_set"))),
-                ("ConfineFullScreenMouseCursor = False", bool(validation.get("cursor_unconfined"))),
-                ("resolution set", bool(validation.get("resolution_set"))),
-            ]),
-            ("[+]  vulkan files", [
-                ("vulkan files installed", bool(validation.get("vulkan_installed"))),
-                ("all DLL files present", bool(validation.get("dll_files_present"))),
-            ]),
+            (
+                "[+]  setup",
+                [
+                    ("configuration file present", bool(validation.get("config_found"))),
+                    ("config backup present", bool(validation.get("backup_found"))),
+                    ("game installation present", bool(validation.get("game_found"))),
+                ],
+            ),
+            (
+                "[+]  settings",
+                [
+                    ("recommended settings applied", bool(validation.get("settings_applied"))),
+                    ("Fullscreen = True", bool(validation.get("fullscreen_set"))),
+                    (
+                        "ConfineFullScreenMouseCursor = False",
+                        bool(validation.get("cursor_unconfined")),
+                    ),
+                    ("resolution set", bool(validation.get("resolution_set"))),
+                ],
+            ),
+            (
+                "[+]  vulkan files",
+                [
+                    ("vulkan files installed", bool(validation.get("vulkan_installed"))),
+                    ("all DLL files present", bool(validation.get("dll_files_present"))),
+                ],
+            ),
         ]
         out: list[tuple[str, int, int]] = []
         for name, items in checks:
@@ -261,9 +274,7 @@ class CompletionPage(ctk.CTkFrame):
         )
         count.grid(row=0, column=2, padx=(8, 16), pady=12)
 
-    def _toggle_failure_details(
-        self, groups: list[tuple[str, int, int]], start_row: int
-    ) -> None:
+    def _toggle_failure_details(self, groups: list[tuple[str, int, int]], start_row: int) -> None:
         self._details_visible = not self._details_visible
         toggle = self._failure_details_toggle
         for w in self._details_widgets:
@@ -321,6 +332,7 @@ class CompletionPage(ctk.CTkFrame):
 
     def on_enter(self, state: WizardState) -> None:
         from wizard.anim import fade_in_labels
+
         fade_in_labels([self._title_lbl, self._subtitle_lbl])
         if state.install_succeeded:
             self._populate_success()

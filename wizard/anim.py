@@ -14,6 +14,7 @@ Conventions:
   * Color values are 7-char hex strings `#rrggbb`. Numeric values are int or
     float. Everything else is treated as a discrete swap at the end.
 """
+
 from __future__ import annotations
 
 import contextlib
@@ -38,11 +39,7 @@ def _cancel_existing(widget: ctk.CTkBaseClass, attr: str) -> None:
 
 
 def _parse_color(value: str) -> tuple[int, int, int] | None:
-    if (
-        isinstance(value, str)
-        and value.startswith("#")
-        and len(value) == 7
-    ):
+    if isinstance(value, str) and value.startswith("#") and len(value) == 7:
         try:
             return (int(value[1:3], 16), int(value[3:5], 16), int(value[5:7], 16))
         except ValueError:
@@ -164,8 +161,15 @@ def slide_banner_in(
         current = label.cget("text_color")
     except Exception:
         return
-    tween(label, attr="text_color", start="#8a8a8a", end=current,
-          duration_ms=duration_ms, steps=14, easing="ease_out")
+    tween(
+        label,
+        attr="text_color",
+        start="#8a8a8a",
+        end=current,
+        duration_ms=duration_ms,
+        steps=14,
+        easing="ease_out",
+    )
 
 
 def _widget_alive(widget: Any) -> bool:

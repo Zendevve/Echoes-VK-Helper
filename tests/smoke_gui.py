@@ -1,4 +1,5 @@
 """Quick GUI smoke test: launch the wizard and capture screenshots of the app window only."""
+
 from __future__ import annotations
 
 import ctypes
@@ -97,7 +98,7 @@ def main() -> int:
         time.sleep(wait)
         app.update_idletasks()
         app.update()
-        path = out_dir / f"page_{i+1}_{name}.png"
+        path = out_dir / f"page_{i + 1}_{name}.png"
         ok = _capture_hwnd(top, path)
         print(f"Captured {name}: {path} ({'ok' if ok else 'FAIL'})")
 

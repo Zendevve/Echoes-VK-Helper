@@ -3,6 +3,7 @@
 Run directly: `python tests/test_update_vulkan.py`
 Exits 0 on success, 1 on failure. No external deps.
 """
+
 from __future__ import annotations
 
 import json
@@ -67,7 +68,11 @@ def test_install_rejects_extras() -> None:
         try:
             uv.verify_zip(zip_path)
         except uv.UpdateError as exc:
-            assert "unexpected files" in str(exc).lower() or "extras" in str(exc).lower() or "readme.txt" in str(exc)
+            assert (
+                "unexpected files" in str(exc).lower()
+                or "extras" in str(exc).lower()
+                or "readme.txt" in str(exc)
+            )
             print("OK: install_rejects_extras")
             return
         raise AssertionError("verify_zip accepted archive with extras")

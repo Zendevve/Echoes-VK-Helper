@@ -1,4 +1,5 @@
 """Echoes Vulkan Helper - entry point."""
+
 from __future__ import annotations
 
 import contextlib

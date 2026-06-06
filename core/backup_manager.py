@@ -1,4 +1,5 @@
 """Rotating backup manager for both config (.bak chain) and DLLs (.backup chain)."""
+
 from __future__ import annotations
 
 import logging

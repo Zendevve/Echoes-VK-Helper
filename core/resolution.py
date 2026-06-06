@@ -1,4 +1,5 @@
 """Resolution detection via screeninfo, with safe fallbacks."""
+
 from __future__ import annotations
 
 import logging

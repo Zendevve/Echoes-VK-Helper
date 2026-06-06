@@ -1,4 +1,5 @@
 """Validation dataclass and the 9-check validation function."""
+
 from __future__ import annotations
 
 import logging

@@ -9,6 +9,7 @@ Windows), warm cream canvas, ASCII bracket glyphs, 4px radius on interactive
 elements, 0px on containers. The single dark surface (INK) is reserved for the
 welcome-page hero TUI mockup and the install-page aborted state.
 """
+
 from __future__ import annotations
 
 import logging
@@ -284,8 +285,7 @@ class WizardController(ctk.CTk):
             corner_radius=ROUNDED_SM,
             command=self._on_back,
         )
-        _wire_button_motion(self._back_btn, base=CANVAS,
-                            hover=SURFACE_SOFT, active=SURFACE_CARD)
+        _wire_button_motion(self._back_btn, base=CANVAS, hover=SURFACE_SOFT, active=SURFACE_CARD)
 
         self._step_label = ctk.CTkLabel(
             self._nav_bar,
@@ -309,8 +309,7 @@ class WizardController(ctk.CTk):
             font=font(size=BUTTON_MD, weight="normal"),
             command=self._on_nav_action,
         )
-        _wire_button_motion(self._cancel_btn, base=CANVAS,
-                            hover=SURFACE_SOFT, active=SURFACE_CARD)
+        _wire_button_motion(self._cancel_btn, base=CANVAS, hover=SURFACE_SOFT, active=SURFACE_CARD)
 
         self._next_btn = ctk.CTkButton(
             self._nav_bar,
@@ -324,8 +323,7 @@ class WizardController(ctk.CTk):
             corner_radius=ROUNDED_SM,
             command=self._on_next,
         )
-        _wire_button_motion(self._next_btn, base=INK,
-                            hover=INK_DEEP, active=INK_DEEP)
+        _wire_button_motion(self._next_btn, base=INK, hover=INK_DEEP, active=INK_DEEP)
 
     def _show_page(self, index: int) -> None:
         if index < 0 or index >= len(PAGE_NAMES):
@@ -359,8 +357,10 @@ class WizardController(ctk.CTk):
                 font=font(size=BUTTON_MD, weight="bold"),
             )
             from wizard.pages._common import update_button_motion
-            update_button_motion(self._cancel_btn, base=DANGER,
-                                 hover=DANGER_HOVER, active=DANGER_ACTIVE)
+
+            update_button_motion(
+                self._cancel_btn, base=DANGER, hover=DANGER_HOVER, active=DANGER_ACTIVE
+            )
         else:
             self._cancel_btn.configure(
                 text="Cancel",
@@ -373,8 +373,10 @@ class WizardController(ctk.CTk):
                 font=font(size=BUTTON_MD, weight="normal"),
             )
             from wizard.pages._common import update_button_motion
-            update_button_motion(self._cancel_btn, base=CANVAS,
-                                 hover=SURFACE_SOFT, active=SURFACE_CARD)
+
+            update_button_motion(
+                self._cancel_btn, base=CANVAS, hover=SURFACE_SOFT, active=SURFACE_CARD
+            )
         self._cancel_btn.grid(row=0, column=2, padx=8, pady=18)
 
         self._next_btn.configure(state="disabled" if is_install else "normal")

@@ -3,6 +3,7 @@
 Run directly: `python tests/test_uninstaller.py`
 Exits 0 on success, 1 on failure. No external deps.
 """
+
 from __future__ import annotations
 
 import sys

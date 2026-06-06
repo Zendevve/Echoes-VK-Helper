@@ -3,6 +3,7 @@
 OpenCode-faithful design system. All page chrome composes from these helpers so
 the brand vocabulary lives in one place.
 """
+
 from __future__ import annotations
 
 import contextlib
@@ -49,9 +50,7 @@ def make_title(parent: ctk.CTkBaseClass, text: str, size: int = DISPLAY_XL) -> c
     )
 
 
-def make_section_label(
-    parent: ctk.CTkBaseClass, text: str
-) -> ctk.CTkLabel:
+def make_section_label(parent: ctk.CTkBaseClass, text: str) -> ctk.CTkLabel:
     """`heading-md` 16/700. Brand section label rendered bare, no chip bg."""
     return ctk.CTkLabel(
         parent,
@@ -161,8 +160,7 @@ def _wire_button_motion(
     ourselves via ``wizard.anim.tween``.
     """
     btn.configure(hover_color=base)
-    state = {"hovered": False, "pressed": False, "base": base,
-             "hover": hover, "active": active}
+    state = {"hovered": False, "pressed": False, "base": base, "hover": hover, "active": active}
 
     def _target() -> str:
         if state["pressed"]:
@@ -172,15 +170,27 @@ def _wire_button_motion(
         return state["base"]
 
     def _animate() -> None:
-        tween(btn, attr="fg_color", start=state["base"], end=_target(),
-              duration_ms=100, steps=8, easing="ease_out")
+        tween(
+            btn,
+            attr="fg_color",
+            start=state["base"],
+            end=_target(),
+            duration_ms=100,
+            steps=8,
+            easing="ease_out",
+        )
 
     btn.bind("<Enter>", lambda _e: (state.__setitem__("hovered", True), _animate()))
-    btn.bind("<Leave>", lambda _e: (state.__setitem__("hovered", False),
-                                    state.__setitem__("pressed", False), _animate()))
+    btn.bind(
+        "<Leave>",
+        lambda _e: (
+            state.__setitem__("hovered", False),
+            state.__setitem__("pressed", False),
+            _animate(),
+        ),
+    )
     btn.bind("<Button-1>", lambda _e: (state.__setitem__("pressed", True), _animate()))
-    btn.bind("<ButtonRelease-1>", lambda _e: (state.__setitem__("pressed", False),
-                                              _animate()))
+    btn.bind("<ButtonRelease-1>", lambda _e: (state.__setitem__("pressed", False), _animate()))
     btn._evh_motion_state = state
     return btn
 
@@ -299,8 +309,15 @@ def set_status(
     beat, but the color eases in so the change reads as alive.
     """
     label.configure(text=mark)
-    tween(label, attr="text_color", start="#8a8a8a", end=color,
-          duration_ms=duration_ms, steps=12, easing="ease_out")
+    tween(
+        label,
+        attr="text_color",
+        start="#8a8a8a",
+        end=color,
+        duration_ms=duration_ms,
+        steps=12,
+        easing="ease_out",
+    )
 
 
 def _open_in_explorer(target: Path | None) -> None:

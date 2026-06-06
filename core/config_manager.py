@@ -1,4 +1,5 @@
 """Detect, read, and modify the Echoes UserPreferences.echoes.ini file."""
+
 from __future__ import annotations
 
 import configparser
@@ -63,9 +64,7 @@ def read_setting(path: Path, key: str) -> str | None:
     return None
 
 
-def apply_recommended_settings(
-    path: Path, resolution: tuple[int, int]
-) -> tuple[str, list[str]]:
+def apply_recommended_settings(path: Path, resolution: tuple[int, int]) -> tuple[str, list[str]]:
     """Ensure Fullscreen=True, ConfineFullScreenMouseCursor=False, Resolution=WxH.
 
     Preserves all other settings. Writes atomically via a temp file. Returns

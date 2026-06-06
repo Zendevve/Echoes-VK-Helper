@@ -1,4 +1,5 @@
 """Locate the Echoes of Angmar install (lotroclient.exe) on the local filesystem."""
+
 from __future__ import annotations
 
 import logging

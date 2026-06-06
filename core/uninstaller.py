@@ -12,6 +12,7 @@ Behavior per file (e.g. `d3d9.dll`):
 Never raises. Returns an `UninstallResult` carrying per-file outcomes and any
 captured `OSError`s so the UI can report them.
 """
+
 from __future__ import annotations
 
 import logging

@@ -1,4 +1,5 @@
 """UAC elevation: relaunch the helper with admin rights while preserving state."""
+
 from __future__ import annotations
 
 import contextlib
@@ -86,14 +87,16 @@ def relaunch_as_admin(state: Any) -> None:
     logger.info("Requesting UAC elevation: %s %s", exe, params)
 
     sw_shownormal = 1
-    rc = int(ctypes.windll.shell32.ShellExecuteW(
-        None,
-        "runas",
-        exe,
-        params,
-        None,
-        sw_shownormal,
-    ))
+    rc = int(
+        ctypes.windll.shell32.ShellExecuteW(
+            None,
+            "runas",
+            exe,
+            params,
+            None,
+            sw_shownormal,
+        )
+    )
     if rc <= 32 or rc == 1223:
         logger.error("ShellExecuteW failed or cancelled with code %s", rc)
         with contextlib.suppress(OSError):

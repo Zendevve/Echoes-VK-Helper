@@ -11,6 +11,7 @@ Strategy:
 
 The result is a `GpuCheckResult` dataclass that the welcome page renders.
 """
+
 from __future__ import annotations
 
 import ctypes

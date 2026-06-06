@@ -1,4 +1,5 @@
 """Step 1 - Welcome page."""
+
 from __future__ import annotations
 
 import configparser
@@ -43,9 +44,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 CONFIG_RELATIVE = Path("Lord of the Rings Online") / "UserPreferences.echoes.ini"
-
-
-
 
 
 class WelcomePage(ctk.CTkFrame):
@@ -213,9 +211,7 @@ class WelcomePage(ctk.CTkFrame):
     def _toggle_tools(self) -> None:
         self._tools_expanded = not self._tools_expanded
         if self._tools_expanded:
-            self._tools_panel.grid(
-                row=1, column=0, columnspan=2, sticky="ew", pady=(8, 0)
-            )
+            self._tools_panel.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(8, 0))
             self._tools_toggle.configure(text="[-]  troubleshoot")
         else:
             self._tools_panel.grid_forget()
@@ -223,6 +219,7 @@ class WelcomePage(ctk.CTkFrame):
 
     def _mark_step_done(self, index: int) -> None:
         from wizard.pages._common import set_status
+
         if 0 <= index < len(self._step_marks):
             set_status(self._step_marks[index], "[x]", SUCCESS)
 
@@ -230,6 +227,7 @@ class WelcomePage(ctk.CTkFrame):
         state.gpu_check_done = False
         state.gpu_check_ok = False
         from wizard.anim import fade_in_labels
+
         fade_in_labels([self._section_lbl, self._intro_lbl])
         self._set_gpu_checking()
         self._start_gpu_check()
@@ -279,6 +277,7 @@ class WelcomePage(ctk.CTkFrame):
 
     def _apply_gpu_result(self, result) -> None:
         from wizard.pages._common import set_status
+
         state: WizardState = self.controller.context
         state.gpu_check_done = True
         state.gpu_check_ok = bool(result.ok)
@@ -377,7 +376,10 @@ class WelcomePage(ctk.CTkFrame):
         if not config.is_file():
             self._show_toast("No config found to uninstall.")
             return
-        if not any(config.with_name(config.name + s).is_file() for s in (".bak", ".bak.1", ".bak.2", ".bak.3", ".bak.4", ".bak.5")):
+        if not any(
+            config.with_name(config.name + s).is_file()
+            for s in (".bak", ".bak.1", ".bak.2", ".bak.3", ".bak.4", ".bak.5")
+        ):
             self._show_toast("No config backup found; nothing to undo.")
             return
 

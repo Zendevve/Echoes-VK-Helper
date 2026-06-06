@@ -16,6 +16,7 @@ The on-disk schema is intentionally minimal and versioned:
 Failures (missing file, malformed JSON, permission errors) are non-fatal; the
 wizard simply falls back to re-running auto-detection.
 """
+
 from __future__ import annotations
 
 import json
