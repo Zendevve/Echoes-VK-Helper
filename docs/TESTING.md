@@ -1,6 +1,10 @@
 <!-- generated-by: gsd-doc-writer -->
 # Testing
 
+> **Internal — not for redistribution.** This page documents how the project
+> maintainer runs the test suite. It is kept here for the maintainer's
+> reference only and is not linked from the user-facing docs.
+
 Test strategy and commands for Echoes Vulkan Helper.
 
 ## Test framework

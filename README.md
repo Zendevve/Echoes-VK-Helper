@@ -1,7 +1,21 @@
+<!-- generated-by: gsd-doc-writer -->
 # Echoes Vulkan Helper
 
 A lightweight Windows wizard that automates the Vulkan compatibility setup for
-LOTRO: Echoes of Angmar. Reduce a multi-step manual process to a few clicks.
+LOTRO: Echoes of Angmar, reducing a multi-step manual process to a few clicks.
+
+## Download
+
+Get the signed, ready-to-run Windows installer from the official release
+channel:
+
+- **Purchase & download:** [Echoes Tools store](https://example.com/store) (link to be filled in)
+- **What's in the box:** `EchoesVulkanHelper-setup.exe` plus an optional portable
+  `EchoesVulkanHelper.exe` that requires no installation.
+
+> The binary is signed by the project owner. An unsigned or repackaged copy is
+> **not** an official build — do not trust it. Always verify the publisher
+> certificate before running.
 
 ## Features
 
@@ -11,75 +25,42 @@ LOTRO: Echoes of Angmar. Reduce a multi-step manual process to a few clicks.
 - Rotating backups of your config and any pre-existing Vulkan files
 - Live log and progress bar during install
 - Single-click recovery: restore from backup, open logs, open folders
-- Single-file EXE build via PyInstaller
+- Signed single-file EXE — no Python, no toolchain, no command line required
 
 ## Requirements
 
 - Windows 10 / 11 (x64)
-- Python 3.12+ (for dev runs)
-- The bundled `assets/vulkan/d3d9.dll` and `dinput8.dll` (DXVK build, x64)
-  - Source: https://github.com/doitsujin/dxvk/releases (MIT licensed)
+- A legitimate copy of LOTRO: Echoes of Angmar installed on the same machine
+- Administrator rights (the helper will request elevation if your game install
+  lives under `Program Files`)
 
-## Dev Run
+## Quick start (end users)
 
-```bash
-pip install -r requirements.txt
-python app.py
-```
+1. Download `EchoesVulkanHelper-setup.exe` from the store link above.
+2. Double-click the installer and follow the prompts.
+3. Launch **Echoes Vulkan Helper** from the Start menu.
+4. Follow the on-screen prompts from **Welcome** through **Complete**.
+5. Launch your game. Done.
 
-## Build the EXE
+> Note: on first run of the installer, Windows SmartScreen will show a warning
+> because the binary is from a small publisher. Click *More info* → *Run anyway*.
+> The official builds are signed — check the publisher name in the SmartScreen
+> dialog before clicking through.
 
-```bash
-pyinstaller --onefile --windowed ^
-  --name EchoesVulkanHelper ^
-  --icon=icon.ico ^
-  --add-data "assets/vulkan;assets/vulkan" ^
-  --collect-all customtkinter ^
-  app.py
-```
+## Support
 
-Output: `dist\EchoesVulkanHelper.exe`.
-
-> Note: an unsigned EXE will trigger a Windows SmartScreen warning on first run.
-> Community distributors should sign the binary.
-
-## Project Layout
-
-```
-echoes-vulkan-helper/
-├── app.py
-├── core/
-│   ├── backup_manager.py
-│   ├── config_manager.py
-│   ├── elevation.py
-│   ├── game_detector.py
-│   ├── logger.py
-│   ├── paths.py
-│   ├── resolution.py
-│   ├── validator.py
-│   └── vulkan_installer.py
-├── wizard/
-│   ├── controller.py
-│   └── pages/
-│       ├── completion_page.py
-│       ├── detection_page.py
-│       ├── install_page.py
-│       ├── summary_page.py
-│       └── welcome_page.py
-├── assets/vulkan/
-│   ├── dinput8.ini
-│   ├── dinput8.dll   <- drop DXVK build here
-│   └── d3d9.dll      <- drop DXVK build here
-└── logs/
-```
+- **Bug reports / issues:** open a ticket at the support email below or use the
+  in-app "Open logs" / "Open folder" buttons to gather diagnostics first.
+- **License questions:** see [COMMERCIAL.md](./COMMERCIAL.md).
+- **Security disclosures:** [zendevve@duck.com](mailto:zendevve@duck.com) (PGP
+  key on request).
 
 ## License
 
-AGPL-3.0 — see [LICENSE](./LICENSE).
+The project source is AGPL-3.0 (see [LICENSE](./LICENSE)). The **prebuilt
+binary you purchased** is covered by a separate, perpetual commercial license
+that lets you use the wizard on as many of your own machines as you like — see
+[COMMERCIAL.md](./COMMERCIAL.md) for the full terms.
 
-## Commercial use
-
-AGPL requires that any modified version you run as a network service be published
-under AGPL. If you want to keep your changes closed, ship a hosted variant, or
-bundle this with a commercial product, a [commercial license](./COMMERCIAL.md)
-is available. Solo-dev and hobbyist relicensing is treated generously.
+Reselling or repackaging the binary is **not** permitted under the commercial
+license; redistribution requires a separate written agreement.
