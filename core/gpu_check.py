@@ -29,6 +29,7 @@ class GpuCheckResult:
     name: str
     reason: str
     api_version: int  # raw VK_MAKE_API_VERSION; 0 if unknown
+    vulkan_version: tuple[int, int, int] | None = None  # decoded (major, minor, patch)
 
     def to_dict(self) -> dict:
         return {
@@ -36,6 +37,7 @@ class GpuCheckResult:
             "name": self.name,
             "reason": self.reason,
             "api_version": self.api_version,
+            "vulkan_version": list(self.vulkan_version) if self.vulkan_version is not None else None,
         }
 
 
@@ -60,6 +62,17 @@ def _decode_api_version(raw: int) -> str:
     minor = (raw >> 12) & 0x3FF
     patch = raw & 0xFFF
     return f"{major}.{minor}.{patch}"
+
+
+def _decode_version_tuple(raw: int) -> tuple[int, int, int] | None:
+    """Decode raw VK_MAKE_VERSION into (major, minor, patch) or None on failure."""
+    if raw <= 0:
+        return None
+    return (
+        (raw >> 22) & 0x7F,
+        (raw >> 12) & 0x3FF,
+        raw & 0xFFF,
+)
 
 
 def _probe_vulkan() -> tuple[bool, int, str]:
