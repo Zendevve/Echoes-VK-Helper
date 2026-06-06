@@ -132,17 +132,66 @@ def _query_display_device() -> str:
     return name
 
 
-def check_gpu() -> GpuCheckResult:
-    """Return a `GpuCheckResult`. Never raises."""
+def _version_to_str(v: tuple[int, int, int]) -> str:
+    return f"{v[0]}.{v[1]}.{v[2]}"
+
+
+def check_vulkan_support(
+    min_version: tuple[int, int, int] = (1, 3, 0),
+) -> GpuCheckResult:
+    """Return a GpuCheckResult. Never raises.
+
+    `min_version` defaults to Vulkan 1.3, the baseline LOTRO requires.
+    """
     try:
         ok, api_version, reason = _probe_vulkan()
+        detected = _decode_version_tuple(api_version)
+
+        if ok and detected is not None:
+            name = _query_display_device() or "Vulkan-capable GPU"
+            meets_min = (
+                detected[0] > min_version[0]
+                or (
+                    detected[0] == min_version[0]
+                    and (
+                        detected[1] > min_version[1]
+                        or (
+                            detected[1] == min_version[1]
+                            and detected[2] >= min_version[2]
+                        )
+                    )
+                )
+            )
+            if meets_min:
+                return GpuCheckResult(
+                    ok=True,
+                    name=name,
+                    reason=f"{reason} (Vulkan {_decode_api_version(api_version)})",
+                    api_version=api_version,
+                    vulkan_version=detected,
+                )
+            return GpuCheckResult(
+                ok=False,
+                name=name,
+                reason=(
+                    f"Vulkan {_decode_api_version(api_version)} is below the "
+                    f"required {_version_to_str(min_version)}. Update your GPU driver."
+                ),
+                api_version=api_version,
+                vulkan_version=detected,
+            )
+
         if ok:
             name = _query_display_device() or "Vulkan-capable GPU"
             return GpuCheckResult(
-                ok=True,
+                ok=False,
                 name=name,
-                reason=f"{reason} (Vulkan {_decode_api_version(api_version)})",
+                reason=(
+                    f"{reason} Version metadata was unreadable; cannot confirm "
+                    f"Vulkan >= {_version_to_str(min_version)}."
+                ),
                 api_version=api_version,
+                vulkan_version=None,
             )
 
         # Vulkan probe failed. Fall back to GDI: we can at least confirm a
@@ -159,6 +208,7 @@ def check_gpu() -> GpuCheckResult:
                     "GPU driver before continuing."
                 ),
                 api_version=0,
+                vulkan_version=None,
             )
 
         logger.warning("GPU check failed: %s", reason)
@@ -170,12 +220,19 @@ def check_gpu() -> GpuCheckResult:
                 "Check that a GPU driver is installed."
             ),
             api_version=0,
+            vulkan_version=None,
         )
     except Exception as exc:
-        logger.exception("Unexpected error in check_gpu: %s", exc)
+        logger.exception("Unexpected error in check_vulkan_support: %s", exc)
         return GpuCheckResult(
             ok=False,
             name="Unknown GPU",
             reason=f"GPU check crashed: {exc}",
             api_version=0,
+            vulkan_version=None,
         )
+
+
+def check_gpu() -> GpuCheckResult:
+    """Deprecated: use check_vulkan_support(). Default minimum is (1,3,0)."""
+    return check_vulkan_support()
