@@ -6,9 +6,9 @@ LOTRO: Echoes of Angmar, reducing a multi-step manual process to a few clicks.
 
 ## Download
 
-Get the prebuilt Windows binary from the official release channel:
+Get the prebuilt Windows binary and support ongoing development:
 
-- **Purchase & download:** [Buy Me a Coffee — Echoes Tools](https://buymeacoffee.com/zendevve/e/545648)
+- **Download & support dev:** [Buy Me a Coffee — Echoes Tools](https://buymeacoffee.com/zendevve/e/545648) — grab the latest `EchoesVulkanHelper.exe` and chip in to keep the project alive.
 - **What's in the box:** `EchoesVulkanHelper.exe` — a portable single-file
   binary built with PyInstaller. No installer, no uninstaller; just
   download, run, and delete the file when you're done.
