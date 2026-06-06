@@ -125,6 +125,18 @@ class WelcomePage(ctk.CTkFrame):
         )
         restore_link.grid(row=0, column=0, sticky="w", padx=8)
 
+        uninstall_link = ctk.CTkButton(
+            footer,
+            text="Uninstall Vulkan helper",
+            fg_color="transparent",
+            hover_color=SURFACE_HOVER,
+            text_color=TEXT_MUTED,
+            width=240,
+            height=32,
+            command=self._on_uninstall_clicked,
+        )
+        uninstall_link.grid(row=0, column=1, sticky="e", padx=8)
+
     def _build_gpu_card(
         self, parent: ctk.CTkFrame
     ) -> tuple[ctk.CTkFrame, ctk.CTkLabel, ctk.CTkLabel]:
@@ -300,6 +312,44 @@ class WelcomePage(ctk.CTkFrame):
             return messagebox.askyesno("Confirm restore", msg)
         except Exception:
             return True
+
+    def _on_uninstall_clicked(self) -> None:
+        from tkinter import filedialog, messagebox
+
+        from core.uninstaller import uninstall_all
+
+        config = self._target_config()
+        if not config.is_file():
+            self._show_toast("No config found to uninstall.")
+            return
+        if not any(config.with_name(config.name + s).is_file() for s in (".bak", ".bak.1", ".bak.2", ".bak.3", ".bak.4", ".bak.5")):
+            self._show_toast("No config backup found; nothing to undo.")
+            return
+
+        game_dir_str = filedialog.askdirectory(
+            title="Select the LOTRO game folder (the one containing dinput8.dll / d3d9.dll)",
+            initialdir=str(Path("C:/")),
+        )
+        if not game_dir_str:
+            return
+        game_dir = Path(game_dir_str)
+
+        msg = (
+            f"Remove Vulkan files from:\n{game_dir}\n\n"
+            f"And restore config:\n{config}\n\n"
+            "Backups will be kept on disk. Continue?"
+        )
+        if not messagebox.askyesno("Confirm uninstall", msg):
+            return
+
+        result = uninstall_all(game_dir, config)
+        if result.has_errors:
+            logger.warning("Uninstall finished with errors: %s", result.errors)
+            self._show_toast("Uninstall finished with errors. See logs.")
+        else:
+            self._show_toast("Uninstalled. Vulkan files removed; config restored.")
+        for line in result.summary_lines():
+            logger.info("Uninstall: %s", line)
 
     def _show_toast(self, message: str) -> None:
         toast = ctk.CTkLabel(

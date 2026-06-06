@@ -131,6 +131,21 @@ class CompletionPage(ctk.CTkFrame):
         )
         restore_btn.grid(row=0, column=3, padx=4, pady=4, sticky="ew")
 
+        uninstall_row = ctk.CTkFrame(self.body, fg_color="transparent")
+        uninstall_row.grid(row=11, column=0, sticky="ew", padx=8, pady=(0, 8))
+        uninstall_row.grid_columnconfigure(0, weight=1)
+        ctk.CTkButton(
+            uninstall_row,
+            text="Uninstall Vulkan Files",
+            height=44,
+            fg_color="transparent",
+            hover_color=SURFACE_HOVER,
+            border_width=1,
+            border_color=SURFACE_HOVER,
+            text_color=TEXT_MUTED,
+            command=self._uninstall_vulkan,
+        ).grid(row=0, column=0, padx=4, pady=4, sticky="ew")
+
     def _populate_failure(self) -> None:
         self._title.configure(text="Installation completed with errors", text_color=DANGER)
         self._subtitle.configure(
@@ -312,35 +327,27 @@ class CompletionPage(ctk.CTkFrame):
     def _uninstall_vulkan(self) -> None:
         from tkinter import messagebox
 
-        from core.vulkan_installer import BACKUP_SUFFIX, VULKAN_FILES, find_latest_backup
+        from core.uninstaller import uninstall_all
 
         state = self.controller.context
         if not state.game_path:
+            self._append_status("Cannot uninstall: no game folder known.")
             return
         if not messagebox.askyesno(
             "Uninstall Vulkan files",
             "Remove dinput8.ini, dinput8.dll, and d3d9.dll from the game folder?\n\n"
-            "Backups (if present) will be restored.",
+            "Backups (if present) will be restored. The config will also be reverted "
+            "to its pre-install state if a backup is available.",
         ):
             return
-        for name in VULKAN_FILES:
-            target = state.game_path / name
-            if not target.is_file():
-                continue
-            backup = find_latest_backup(target)
-            if backup is not None:
-                try:
-                    backup.replace(target)
-                    logger.info("Restored %s from %s", target, backup)
-                except OSError as exc:
-                    logger.warning("Could not restore backup for %s: %s", target, exc)
-            else:
-                try:
-                    target.unlink()
-                    logger.info("Removed %s", target)
-                except OSError as exc:
-                    logger.warning("Could not remove %s: %s", target, exc)
-        self._append_status("Vulkan files uninstalled.")
+        result = uninstall_all(state.game_path, state.config_path)
+        if result.has_errors:
+            logger.warning("Uninstall completed with errors: %s", result.errors)
+            self._append_status("Uninstall finished with errors. See logs.")
+        else:
+            self._append_status("Vulkan files uninstalled. Config: " + result.config_action + ".")
+        for line in result.summary_lines():
+            self._append_status(line)
 
     def _append_status(self, message: str) -> None:
         lbl = ctk.CTkLabel(
